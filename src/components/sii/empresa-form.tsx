@@ -18,7 +18,7 @@ const empresaSchema = z.object({
   acteco: z.string().optional(),
   telefono: z.string().optional(),
   email: z.string().email("Email invalido").optional().or(z.literal("")),
-  resolucion_numero: z.coerce.number().min(1, "Numero de resolucion requerido"),
+  resolucion_numero: z.coerce.number().min(0, "Numero de resolucion requerido"),
   resolucion_fecha: z.string().min(1, "Fecha de resolucion requerida"),
   ambiente: z.enum(["CERTIFICACION", "PRODUCCION"]),
 });
@@ -213,9 +213,13 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
             <Input
               id="resolucion_numero"
               type="number"
-              placeholder="80"
+              min="0"
+              placeholder="0"
               {...register("resolucion_numero")}
             />
+            <p className="text-xs text-muted-foreground">
+              Para CERTIFICACION usar 0. Para PRODUCCION usar el numero real.
+            </p>
             {errors.resolucion_numero && (
               <p className="text-sm text-red-500">{errors.resolucion_numero.message}</p>
             )}
