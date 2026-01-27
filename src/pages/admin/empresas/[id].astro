@@ -2,32 +2,33 @@
 import Layout from '@/layouts/Layout.astro';
 import { buttonVariants } from '@/components/ui/button';
 import { Pencil, ArrowLeft, Building2, FileText, FolderKey, Shield } from 'lucide-react';
+import { empresasService, certificadosService, cafService, dteService } from '@/lib/sii-api';
 
 const { id } = Astro.params;
 
-// TODO: Obtener de la API real
-const empresa = {
-  id: id,
-  rut: '76.XXX.XXX-X',
-  razon_social: 'Empresa Demo SpA',
-  giro: 'Servicios de software y desarrollo',
-  direccion: 'Av. Principal 123, Of. 456',
-  comuna: 'Santiago',
-  ciudad: 'Santiago',
-  acteco: '620100',
-  telefono: '+56 9 1234 5678',
-  email: 'contacto@empresa.cl',
-  resolucion_numero: 80,
-  resolucion_fecha: '2024-01-01',
-  ambiente: 'CERTIFICACION',
-  activa: true,
-  created_at: '2024-01-01T10:00:00',
-};
+// Obtener datos de la empresa de la API
+const empresaResponse = await empresasService.obtener(id!);
+const empresa = empresaResponse.success ? empresaResponse.data : null;
+
+if (!empresa) {
+  return Astro.redirect('/admin/empresas');
+}
+
+// Obtener estadisticas en paralelo
+const [certificadoResponse, cafResponse, dteResponse] = await Promise.all([
+  certificadosService.obtener(id!),
+  cafService.listar(id),
+  dteService.listar({ empresa_id: id }),
+]);
+
+const certificado = certificadoResponse.success ? certificadoResponse.data : null;
+const cafs = cafResponse.success && cafResponse.data ? cafResponse.data : [];
+const dtes = dteResponse.success && dteResponse.data ? dteResponse.data : [];
 
 const stats = {
-  dtes_emitidos: 156,
-  cafs_activos: 4,
-  certificado_vigente: true,
+  dtes_emitidos: dtes.length,
+  cafs_activos: cafs.filter(c => c.estado === 'ACTIVO').length,
+  certificado_vigente: certificado ? new Date(certificado.fecha_vencimiento) > new Date() : false,
 };
 ---
 

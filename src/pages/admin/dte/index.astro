@@ -3,40 +3,23 @@ import Layout from '@/layouts/Layout.astro';
 import { buttonVariants } from '@/components/ui/button';
 import { Plus, FileText, Filter } from 'lucide-react';
 import { DTETable } from '@/components/sii/dte-table';
+import { dteService } from '@/lib/sii-api';
 
-// TODO: Obtener de la API real
-const dtes = [
-  {
-    id: '1',
-    tipo_dte: 33,
-    folio: 123,
-    fecha_emision: '2024-01-15',
-    receptor_rut: '12.345.678-9',
-    receptor_razon_social: 'Cliente Ejemplo',
-    monto_total: 119000,
-    estado: 'ACEPTADO',
-  },
-  {
-    id: '2',
-    tipo_dte: 39,
-    folio: 456,
-    fecha_emision: '2024-01-15',
-    receptor_rut: '',
-    receptor_razon_social: 'Consumidor Final',
-    monto_total: 15900,
-    estado: 'GENERADO',
-  },
-  {
-    id: '3',
-    tipo_dte: 61,
-    folio: 12,
-    fecha_emision: '2024-01-14',
-    receptor_rut: '12.345.678-9',
-    receptor_razon_social: 'Cliente Ejemplo',
-    monto_total: 59500,
-    estado: 'ENVIADO',
-  },
-];
+// Obtener parametros de filtro de la URL
+const url = Astro.url;
+const tipo_dte = url.searchParams.get('tipo_dte');
+const estado = url.searchParams.get('estado');
+const fecha_desde = url.searchParams.get('fecha_desde');
+const fecha_hasta = url.searchParams.get('fecha_hasta');
+
+// Obtener DTEs de la API con filtros
+const response = await dteService.listar({
+  tipo_dte: tipo_dte ? parseInt(tipo_dte) as 33 | 34 | 39 | 41 | 52 | 56 | 61 : undefined,
+  estado: estado || undefined,
+  fecha_desde: fecha_desde || undefined,
+  fecha_hasta: fecha_hasta || undefined,
+});
+const dtes = response.success && response.data ? response.data : [];
 
 const tiposDTE = {
   33: 'Factura',

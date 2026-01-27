@@ -4,14 +4,17 @@
  * Este cliente maneja todas las comunicaciones con el backend Go
  */
 
-// URL base de la API (se configura en wrangler.toml o .env)
+// URL base de la API
+const API_URL_PROD = "https://sii-facturacion-api.edgar-gomero.workers.dev";
+const API_URL_DEV = "http://localhost:8080";
+
 const getApiUrl = () => {
-  if (typeof window !== "undefined") {
-    // Cliente: usar variable publica
-    return import.meta.env.PUBLIC_API_URL || "http://localhost:8080";
+  // En desarrollo local usar localhost
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return API_URL_DEV;
   }
-  // Servidor: usar variable de entorno
-  return process.env.API_URL || "http://localhost:8080";
+  // En producción usar la URL del backend
+  return API_URL_PROD;
 };
 
 // Tipos de respuesta de la API

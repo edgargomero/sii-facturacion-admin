@@ -3,28 +3,11 @@ import Layout from '@/layouts/Layout.astro';
 import { buttonVariants } from '@/components/ui/button';
 import { Plus, Building2, CheckCircle, XCircle } from 'lucide-react';
 import { EmpresasTable } from '@/components/sii/empresas-table';
+import { empresasService } from '@/lib/sii-api';
 
-// TODO: Obtener de la API real
-const empresas = [
-  {
-    id: '1',
-    rut: '76.XXX.XXX-X',
-    razon_social: 'Empresa Demo SpA',
-    giro: 'Servicios de software',
-    comuna: 'Santiago',
-    ambiente: 'CERTIFICACION',
-    activa: true,
-  },
-  {
-    id: '2',
-    rut: '77.XXX.XXX-X',
-    razon_social: 'Comercial Ejemplo Ltda',
-    giro: 'Comercio al por menor',
-    comuna: 'Providencia',
-    ambiente: 'CERTIFICACION',
-    activa: true,
-  },
-];
+// Obtener empresas de la API
+const response = await empresasService.listar();
+const empresas = response.success && response.data ? response.data : [];
 ---
 
 <Layout title="Empresas">

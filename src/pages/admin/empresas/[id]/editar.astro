@@ -2,23 +2,32 @@
 import Layout from '@/layouts/Layout.astro';
 import { EmpresaForm } from '@/components/sii/empresa-form';
 import { ArrowLeft } from 'lucide-react';
+import { empresasService } from '@/lib/sii-api';
 
 const { id } = Astro.params;
 
-// TODO: Obtener de la API real
+// Obtener datos de la empresa de la API
+const response = await empresasService.obtener(id!);
+const empresaData = response.success ? response.data : null;
+
+if (!empresaData) {
+  return Astro.redirect('/admin/empresas');
+}
+
+// Transformar datos para el formulario
 const empresa = {
-  rut: '76.XXX.XXX-X',
-  razon_social: 'Empresa Demo SpA',
-  giro: 'Servicios de software y desarrollo',
-  direccion: 'Av. Principal 123, Of. 456',
-  comuna: 'Santiago',
-  ciudad: 'Santiago',
-  acteco: '620100',
-  telefono: '+56 9 1234 5678',
-  email: 'contacto@empresa.cl',
-  resolucion_numero: 80,
-  resolucion_fecha: '2024-01-01',
-  ambiente: 'CERTIFICACION' as const,
+  rut: empresaData.rut,
+  razon_social: empresaData.razon_social,
+  giro: empresaData.giro,
+  direccion: empresaData.direccion,
+  comuna: empresaData.comuna,
+  ciudad: empresaData.ciudad,
+  acteco: empresaData.acteco || '',
+  telefono: empresaData.telefono || '',
+  email: empresaData.email || '',
+  resolucion_numero: empresaData.resolucion_numero,
+  resolucion_fecha: empresaData.resolucion_fecha,
+  ambiente: empresaData.ambiente as 'CERTIFICACION' | 'PRODUCCION',
 };
 ---
 
@@ -32,6 +41,6 @@ const empresa = {
       Modifica los datos de la empresa.
     </p>
 
-    <EmpresaForm initialData={empresa} client:load />
+    <EmpresaForm initialData={empresa} empresaId={id} client:load />
   </div>
 </Layout>

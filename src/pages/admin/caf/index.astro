@@ -2,40 +2,31 @@
 import Layout from '@/layouts/Layout.astro';
 import { buttonVariants } from '@/components/ui/button';
 import { Upload, FolderKey, AlertTriangle, CheckCircle } from 'lucide-react';
+import { cafService } from '@/lib/sii-api';
 
-// TODO: Obtener de la API real
-const cafs = [
-  {
-    id: '1',
-    tipo_dte: 33,
-    tipo_nombre: 'Factura Electronica',
-    rango_desde: 1,
-    rango_hasta: 100,
-    folios_disponibles: 45,
-    fecha_autorizacion: '2024-01-01',
-    estado: 'ACTIVO',
-  },
-  {
-    id: '2',
-    tipo_dte: 39,
-    tipo_nombre: 'Boleta Electronica',
-    rango_desde: 1,
-    rango_hasta: 500,
-    folios_disponibles: 12,
-    fecha_autorizacion: '2024-01-01',
-    estado: 'ACTIVO',
-  },
-  {
-    id: '3',
-    tipo_dte: 61,
-    tipo_nombre: 'Nota de Credito',
-    rango_desde: 1,
-    rango_hasta: 50,
-    folios_disponibles: 50,
-    fecha_autorizacion: '2024-01-05',
-    estado: 'ACTIVO',
-  },
-];
+// Mapeo de tipos de DTE a nombres
+const TIPOS_DTE_NOMBRES: Record<number, string> = {
+  33: 'Factura Electronica',
+  34: 'Factura Exenta',
+  39: 'Boleta Electronica',
+  41: 'Boleta Exenta',
+  52: 'Guia de Despacho',
+  56: 'Nota de Debito',
+  61: 'Nota de Credito',
+};
+
+// Obtener parametro de empresa de la URL (opcional)
+const empresaId = Astro.url.searchParams.get('empresa') || undefined;
+
+// Obtener CAFs de la API
+const response = await cafService.listar(empresaId);
+const cafsRaw = response.success && response.data ? response.data : [];
+
+// Transformar a formato con nombre de tipo
+const cafs = cafsRaw.map(caf => ({
+  ...caf,
+  tipo_nombre: TIPOS_DTE_NOMBRES[caf.tipo_dte] || `Tipo ${caf.tipo_dte}`,
+}));
 
 const getStatusColor = (disponibles: number, total: number) => {
   const porcentaje = (disponibles / total) * 100;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Save, Plus, Trash2, FileText } from "lucide-react";
+import { dteService, empresasService } from "@/lib/sii-api";
+import type { Empresa } from "@/lib/sii-api";
 
 const detalleSchema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
@@ -36,6 +38,26 @@ const formatMoney = (value: number) => {
 export function BoletaForm({ empresaId }: BoletaFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [isLoadingEmpresas, setIsLoadingEmpresas] = useState(true);
+
+  // Cargar lista de empresas
+  useEffect(() => {
+    const loadEmpresas = async () => {
+      setIsLoadingEmpresas(true);
+      try {
+        const result = await empresasService.listar();
+        if (result.success && result.data) {
+          setEmpresas(result.data);
+        }
+      } catch (err) {
+        console.error("Error cargando empresas:", err);
+      } finally {
+        setIsLoadingEmpresas(false);
+      }
+    };
+    loadEmpresas();
+  }, []);
 
   const {
     register,
@@ -74,10 +96,20 @@ export function BoletaForm({ empresaId }: BoletaFormProps) {
     setError(null);
 
     try {
-      // TODO: Llamar a la API
-      console.log("Datos boleta:", data);
+      const result = await dteService.generarBoleta({
+        empresa_id: data.empresa_id,
+        detalles: data.detalles.map((d) => ({
+          nombre: d.nombre,
+          cantidad: d.cantidad,
+          precio_unitario: d.precio_unitario,
+        })),
+        fecha_emision: data.fecha_emision || undefined,
+      });
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      if (!result.success) {
+        setError(result.error?.message || "Error al generar la boleta");
+        return;
+      }
 
       window.location.href = "/admin/dte";
     } catch (err) {
@@ -101,15 +133,32 @@ export function BoletaForm({ empresaId }: BoletaFormProps) {
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="empresa_id">Empresa *</Label>
-            <select
-              id="empresa_id"
-              {...register("empresa_id")}
-              className="w-full border rounded-md px-3 py-2"
-            >
-              <option value="">Seleccione una empresa</option>
-              <option value="1">76.XXX.XXX-X - Empresa Demo SpA</option>
-              <option value="2">77.XXX.XXX-X - Comercial Ejemplo Ltda</option>
-            </select>
+            {isLoadingEmpresas ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Cargando empresas...
+              </div>
+            ) : empresas.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-2">
+                No hay empresas registradas.{" "}
+                <a href="/admin/empresas/nueva" className="text-primary hover:underline">
+                  Crear una empresa
+                </a>
+              </p>
+            ) : (
+              <select
+                id="empresa_id"
+                {...register("empresa_id")}
+                className="w-full border rounded-md px-3 py-2"
+              >
+                <option value="">Seleccione una empresa</option>
+                {empresas.map((empresa) => (
+                  <option key={empresa.id} value={empresa.id}>
+                    {empresa.rut} - {empresa.razon_social}
+                  </option>
+                ))}
+              </select>
+            )}
             {errors.empresa_id && (
               <p className="text-sm text-red-500">{errors.empresa_id.message}</p>
             )}

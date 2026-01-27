@@ -4,29 +4,25 @@
 
 name = "sii-facturacion-admin"
 compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
 
-# Variables de entorno (desarrollo)
+# Variables de entorno por defecto
 [vars]
-# URL de la API Go (cambiar segun ambiente)
-API_URL = "http://localhost:8080"
+API_URL = "https://sii-facturacion-api.edgar-gomero.workers.dev"
 ENVIRONMENT = "development"
 
 # ===========================================
-# Entorno de Staging (Certificacion SII)
+# Entorno Preview (PRs y branches)
 # ===========================================
-[env.staging]
-name = "sii-facturacion-admin-staging"
-
-[env.staging.vars]
-API_URL = "https://sii-api-staging.tu-dominio.com"
-ENVIRONMENT = "staging"
+[env.preview]
+[env.preview.vars]
+API_URL = "https://sii-facturacion-api.edgar-gomero.workers.dev"
+ENVIRONMENT = "preview"
 
 # ===========================================
 # Entorno de Produccion
 # ===========================================
 [env.production]
-name = "sii-facturacion-admin"
-
 [env.production.vars]
-API_URL = "https://sii-api.tu-dominio.com"
+API_URL = "https://sii-facturacion-api.edgar-gomero.workers.dev"
 ENVIRONMENT = "production"

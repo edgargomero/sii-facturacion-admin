@@ -1,0 +1,55 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { CertificadoForm } from '@/components/sii/certificado-form';
+import { ArrowLeft, Shield } from 'lucide-react';
+import { empresasService, certificadosService } from '@/lib/sii-api';
+
+const { id } = Astro.params;
+
+// Obtener datos de la empresa
+const empresaResponse = await empresasService.obtener(id!);
+const empresa = empresaResponse.success ? empresaResponse.data : null;
+
+// Obtener certificado actual (si existe)
+const certificadoResponse = await certificadosService.obtener(id!);
+const certificado = certificadoResponse.success ? certificadoResponse.data : null;
+
+if (!empresa) {
+  return Astro.redirect('/admin/empresas');
+}
+---
+
+<Layout title={`Certificado Digital - ${empresa.razon_social}`}>
+  <div class="max-w-2xl">
+    <a href={`/admin/empresas/${id}`} class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+      <ArrowLeft class="mr-1 h-4 w-4" /> Volver al detalle de empresa
+    </a>
+
+    <div class="flex items-center gap-3 mb-6">
+      <Shield class="h-8 w-8 text-primary" />
+      <div>
+        <h2 class="text-xl font-semibold">Certificado Digital</h2>
+        <p class="text-muted-foreground">{empresa.razon_social}</p>
+      </div>
+    </div>
+
+    <p class="text-muted-foreground mb-6">
+      {certificado
+        ? 'Puedes actualizar el certificado digital de la empresa. El nuevo certificado reemplazara al actual.'
+        : 'Carga el certificado digital (.pfx) para poder firmar documentos electronicos y comunicarte con el SII.'
+      }
+    </p>
+
+    <CertificadoForm
+      empresaId={id!}
+      empresaNombre={empresa.razon_social}
+      certificadoActual={certificado ? {
+        nombre: certificado.nombre,
+        rut_titular: certificado.rut_titular,
+        fecha_vencimiento: certificado.fecha_vencimiento,
+        activo: certificado.activo
+      } : undefined}
+      client:load
+    />
+  </div>
+</Layout>

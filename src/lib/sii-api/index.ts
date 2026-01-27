@@ -17,6 +17,7 @@ export { cafService } from "./services/caf";
 export { rcofService } from "./services/rcof";
 export { authService } from "./services/auth";
 export { envioService } from "./services/envio";
+export { certificadosService } from "./services/certificados";
 
 // Re-exportar tipos de servicios
 export type { ListarDTEsParams } from "./services/dte";

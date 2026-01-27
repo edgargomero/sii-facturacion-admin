@@ -21,7 +21,7 @@ export default defineConfig({
   vite: {
     define: {
       "import.meta.env.PUBLIC_API_URL": JSON.stringify(
-        process.env.API_URL || "http://localhost:8080"
+        process.env.API_URL || "https://sii-facturacion-api.edgar-gomero.workers.dev"
       ),
     },
   },

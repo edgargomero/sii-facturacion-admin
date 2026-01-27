@@ -1,46 +1,14 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import { Send, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+import { envioService } from '@/lib/sii-api';
 
-// TODO: Obtener de la API real
-const envios = [
-  {
-    id: '1',
-    tipo: 'DTE',
-    track_id: '123456789',
-    estado: 'ACEPTADO',
-    glosa: 'Documento recibido conforme',
-    fecha_envio: '2024-01-15T10:30:00',
-    fecha_respuesta: '2024-01-15T10:35:00',
-    cantidad_dte: 5,
-    cantidad_aceptados: 5,
-    cantidad_rechazados: 0,
-  },
-  {
-    id: '2',
-    tipo: 'DTE',
-    track_id: '987654321',
-    estado: 'ENVIADO',
-    glosa: 'Procesando',
-    fecha_envio: '2024-01-16T09:00:00',
-    fecha_respuesta: null,
-    cantidad_dte: 3,
-    cantidad_aceptados: 0,
-    cantidad_rechazados: 0,
-  },
-  {
-    id: '3',
-    tipo: 'RCOF',
-    track_id: '456789123',
-    estado: 'RECHAZADO',
-    glosa: 'Error en secuencia de envio',
-    fecha_envio: '2024-01-14T14:00:00',
-    fecha_respuesta: '2024-01-14T14:05:00',
-    cantidad_dte: 1,
-    cantidad_aceptados: 0,
-    cantidad_rechazados: 1,
-  },
-];
+// Obtener parametro de empresa de la URL (opcional)
+const empresaId = Astro.url.searchParams.get('empresa') || undefined;
+
+// Obtener envios de la API
+const response = await envioService.listar(empresaId);
+const envios = response.success && response.data ? response.data : [];
 
 const getStatusConfig = (estado: string) => {
   switch (estado) {

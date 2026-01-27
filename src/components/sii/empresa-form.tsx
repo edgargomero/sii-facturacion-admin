@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Save } from "lucide-react";
+import { empresasService } from "@/lib/sii-api";
 
 const empresaSchema = z.object({
   rut: z.string().min(9, "RUT invalido").max(12),
@@ -26,10 +27,11 @@ type EmpresaFormData = z.infer<typeof empresaSchema>;
 
 interface EmpresaFormProps {
   initialData?: Partial<EmpresaFormData>;
+  empresaId?: string; // Si se proporciona, es modo edicion
   onSuccess?: () => void;
 }
 
-export function EmpresaForm({ initialData, onSuccess }: EmpresaFormProps) {
+export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,11 +52,29 @@ export function EmpresaForm({ initialData, onSuccess }: EmpresaFormProps) {
     setError(null);
 
     try {
-      // TODO: Llamar a la API
-      console.log("Datos empresa:", data);
+      const requestData = {
+        rut: data.rut,
+        razon_social: data.razon_social,
+        giro: data.giro,
+        direccion: data.direccion,
+        comuna: data.comuna,
+        ciudad: data.ciudad,
+        acteco: data.acteco || undefined,
+        telefono: data.telefono || undefined,
+        email: data.email || undefined,
+        resolucion_numero: data.resolucion_numero,
+        resolucion_fecha: data.resolucion_fecha,
+        ambiente: data.ambiente,
+      };
 
-      // Simular llamada API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const result = empresaId
+        ? await empresasService.actualizar(empresaId, requestData)
+        : await empresasService.crear(requestData);
+
+      if (!result.success) {
+        setError(result.error?.message || "Error al guardar la empresa");
+        return;
+      }
 
       if (onSuccess) {
         onSuccess();
