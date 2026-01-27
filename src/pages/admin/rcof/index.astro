@@ -1,0 +1,133 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { buttonVariants } from '@/components/ui/button';
+import { Plus, FileBarChart, CheckCircle, Clock, XCircle, Send } from 'lucide-react';
+
+// TODO: Obtener de la API real
+const rcofs = [
+  {
+    id: '1',
+    fecha_inicio: '2024-01-01',
+    fecha_fin: '2024-01-31',
+    secuencia_envio: 1,
+    estado: 'ACEPTADO',
+    track_id: '123456789',
+    created_at: '2024-02-01T10:00:00',
+  },
+  {
+    id: '2',
+    fecha_inicio: '2024-02-01',
+    fecha_fin: '2024-02-15',
+    secuencia_envio: 2,
+    estado: 'ENVIADO',
+    track_id: '987654321',
+    created_at: '2024-02-16T09:30:00',
+  },
+  {
+    id: '3',
+    fecha_inicio: '2024-02-16',
+    fecha_fin: '2024-02-29',
+    secuencia_envio: 3,
+    estado: 'GENERADO',
+    track_id: null,
+    created_at: '2024-03-01T08:00:00',
+  },
+];
+
+const getStatusIcon = (estado: string) => {
+  switch (estado) {
+    case 'ACEPTADO':
+      return { icon: CheckCircle, color: 'text-green-500' };
+    case 'ENVIADO':
+      return { icon: Clock, color: 'text-yellow-500' };
+    case 'RECHAZADO':
+      return { icon: XCircle, color: 'text-red-500' };
+    default:
+      return { icon: FileBarChart, color: 'text-gray-500' };
+  }
+};
+---
+
+<Layout title="RCOF - Reporte Consumo de Folios">
+  <Fragment slot="actions">
+    <a href="/admin/rcof/generar" class={buttonVariants()}>
+      <Plus class="mr-2 h-4 w-4" /> Generar RCOF
+    </a>
+  </Fragment>
+
+  <div class="space-y-6">
+    <p class="text-muted-foreground">
+      Reportes de Consumo de Folios enviados al SII. Obligatorio para boletas electronicas.
+    </p>
+
+    <!-- Tabla de RCOFs -->
+    <div class="rounded-xl border">
+      <table class="w-full">
+        <thead class="bg-muted/50">
+          <tr>
+            <th class="px-4 py-3 text-left text-sm font-medium">Periodo</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Secuencia</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Estado</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Track ID</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Fecha Generacion</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          {rcofs.map((rcof) => {
+            const status = getStatusIcon(rcof.estado);
+            const StatusIcon = status.icon;
+
+            return (
+              <tr class="hover:bg-muted/30">
+                <td class="px-4 py-3 text-sm">
+                  {new Date(rcof.fecha_inicio).toLocaleDateString('es-CL')} - {new Date(rcof.fecha_fin).toLocaleDateString('es-CL')}
+                </td>
+                <td class="px-4 py-3 text-sm font-mono">
+                  #{rcof.secuencia_envio}
+                </td>
+                <td class="px-4 py-3">
+                  <span class={`flex items-center gap-1.5 text-sm ${status.color}`}>
+                    <StatusIcon class="h-4 w-4" />
+                    {rcof.estado}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm font-mono text-muted-foreground">
+                  {rcof.track_id || '-'}
+                </td>
+                <td class="px-4 py-3 text-sm text-muted-foreground">
+                  {new Date(rcof.created_at).toLocaleString('es-CL')}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex gap-2">
+                    <a
+                      href={`/admin/rcof/${rcof.id}`}
+                      class="text-sm text-primary hover:underline"
+                    >
+                      Ver
+                    </a>
+                    {rcof.estado === 'GENERADO' && (
+                      <button class="text-sm text-primary hover:underline flex items-center gap-1">
+                        <Send class="h-3 w-3" />
+                        Enviar
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Info -->
+    <div class="rounded-xl border bg-muted/30 p-4">
+      <h4 class="font-medium mb-2">Sobre el RCOF</h4>
+      <p class="text-sm text-muted-foreground">
+        El Reporte de Consumo de Folios (RCOF) es un documento obligatorio que resume el uso de folios
+        de boletas electronicas en un periodo determinado. Debe enviarse al SII de forma periodica.
+      </p>
+    </div>
+  </div>
+</Layout>

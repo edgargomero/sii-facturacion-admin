@@ -1,0 +1,46 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { buttonVariants } from '@/components/ui/button';
+import { Plus, Building2, CheckCircle, XCircle } from 'lucide-react';
+import { EmpresasTable } from '@/components/sii/empresas-table';
+
+// TODO: Obtener de la API real
+const empresas = [
+  {
+    id: '1',
+    rut: '76.XXX.XXX-X',
+    razon_social: 'Empresa Demo SpA',
+    giro: 'Servicios de software',
+    comuna: 'Santiago',
+    ambiente: 'CERTIFICACION',
+    activa: true,
+  },
+  {
+    id: '2',
+    rut: '77.XXX.XXX-X',
+    razon_social: 'Comercial Ejemplo Ltda',
+    giro: 'Comercio al por menor',
+    comuna: 'Providencia',
+    ambiente: 'CERTIFICACION',
+    activa: true,
+  },
+];
+---
+
+<Layout title="Empresas">
+  <Fragment slot="actions">
+    <a href="/admin/empresas/nueva" class={buttonVariants()}>
+      <Plus class="mr-2 h-4 w-4" /> Nueva Empresa
+    </a>
+  </Fragment>
+
+  <div class="space-y-4">
+    <p class="text-muted-foreground">
+      Gestiona las empresas emisoras de documentos tributarios.
+    </p>
+
+    <div class="rounded-xl border">
+      <EmpresasTable empresas={empresas} client:load />
+    </div>
+  </div>
+</Layout>

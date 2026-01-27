@@ -1,0 +1,32 @@
+# ===========================================
+# SII Facturacion Admin - Cloudflare Pages
+# ===========================================
+
+name = "sii-facturacion-admin"
+compatibility_date = "2024-01-01"
+
+# Variables de entorno (desarrollo)
+[vars]
+# URL de la API Go (cambiar segun ambiente)
+API_URL = "http://localhost:8080"
+ENVIRONMENT = "development"
+
+# ===========================================
+# Entorno de Staging (Certificacion SII)
+# ===========================================
+[env.staging]
+name = "sii-facturacion-admin-staging"
+
+[env.staging.vars]
+API_URL = "https://sii-api-staging.tu-dominio.com"
+ENVIRONMENT = "staging"
+
+# ===========================================
+# Entorno de Produccion
+# ===========================================
+[env.production]
+name = "sii-facturacion-admin"
+
+[env.production.vars]
+API_URL = "https://sii-api.tu-dominio.com"
+ENVIRONMENT = "production"

@@ -1,0 +1,92 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { buttonVariants } from '@/components/ui/button';
+import { Plus, FileText, Filter } from 'lucide-react';
+import { DTETable } from '@/components/sii/dte-table';
+
+// TODO: Obtener de la API real
+const dtes = [
+  {
+    id: '1',
+    tipo_dte: 33,
+    folio: 123,
+    fecha_emision: '2024-01-15',
+    receptor_rut: '12.345.678-9',
+    receptor_razon_social: 'Cliente Ejemplo',
+    monto_total: 119000,
+    estado: 'ACEPTADO',
+  },
+  {
+    id: '2',
+    tipo_dte: 39,
+    folio: 456,
+    fecha_emision: '2024-01-15',
+    receptor_rut: '',
+    receptor_razon_social: 'Consumidor Final',
+    monto_total: 15900,
+    estado: 'GENERADO',
+  },
+  {
+    id: '3',
+    tipo_dte: 61,
+    folio: 12,
+    fecha_emision: '2024-01-14',
+    receptor_rut: '12.345.678-9',
+    receptor_razon_social: 'Cliente Ejemplo',
+    monto_total: 59500,
+    estado: 'ENVIADO',
+  },
+];
+
+const tiposDTE = {
+  33: 'Factura',
+  34: 'Factura Exenta',
+  39: 'Boleta',
+  41: 'Boleta Exenta',
+  52: 'Guia Despacho',
+  56: 'Nota Debito',
+  61: 'Nota Credito',
+};
+---
+
+<Layout title="Documentos Tributarios">
+  <Fragment slot="actions">
+    <div class="flex gap-2">
+      <a href="/admin/dte/factura" class={buttonVariants()}>
+        <Plus class="mr-2 h-4 w-4" /> Factura
+      </a>
+      <a href="/admin/dte/boleta" class={buttonVariants({ variant: 'outline' })}>
+        <Plus class="mr-2 h-4 w-4" /> Boleta
+      </a>
+    </div>
+  </Fragment>
+
+  <div class="space-y-4">
+    <p class="text-muted-foreground">
+      Lista de documentos tributarios electronicos emitidos.
+    </p>
+
+    <!-- Filtros -->
+    <div class="flex gap-4 flex-wrap">
+      <select class="border rounded-md px-3 py-2 text-sm">
+        <option value="">Todos los tipos</option>
+        {Object.entries(tiposDTE).map(([key, value]) => (
+          <option value={key}>{value}</option>
+        ))}
+      </select>
+      <select class="border rounded-md px-3 py-2 text-sm">
+        <option value="">Todos los estados</option>
+        <option value="GENERADO">Generado</option>
+        <option value="ENVIADO">Enviado</option>
+        <option value="ACEPTADO">Aceptado</option>
+        <option value="RECHAZADO">Rechazado</option>
+      </select>
+      <input type="date" class="border rounded-md px-3 py-2 text-sm" placeholder="Desde" />
+      <input type="date" class="border rounded-md px-3 py-2 text-sm" placeholder="Hasta" />
+    </div>
+
+    <div class="rounded-xl border">
+      <DTETable dtes={dtes} client:load />
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,174 @@
+---
+import {
+  Building2,
+  FileText,
+  FolderKey,
+  FileBarChart,
+  Send,
+  AlertTriangle,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
+import Layout from '@/layouts/Layout.astro';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+// TODO: Obtener datos reales de la API
+// Por ahora usamos datos de ejemplo
+const stats = {
+  empresas: 3,
+  dtes_mes: 156,
+  facturado_mes: 12500000,
+  cafs_por_vencer: 2,
+  envios_pendientes: 5,
+  envios_aceptados: 148,
+  envios_rechazados: 3,
+};
+
+const formatMoney = (value: number) => {
+  return new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    minimumFractionDigits: 0,
+  }).format(value);
+};
+
+const cards = [
+  {
+    name: 'Empresas',
+    value: stats.empresas,
+    icon: Building2,
+    href: '/admin/empresas',
+    color: 'text-blue-500',
+  },
+  {
+    name: 'DTEs este mes',
+    value: stats.dtes_mes,
+    icon: FileText,
+    href: '/admin/dte',
+    color: 'text-green-500',
+  },
+  {
+    name: 'Facturado este mes',
+    value: formatMoney(stats.facturado_mes),
+    icon: FileBarChart,
+    color: 'text-emerald-500',
+  },
+  {
+    name: 'CAFs por vencer',
+    value: stats.cafs_por_vencer,
+    icon: FolderKey,
+    href: '/admin/caf',
+    color: stats.cafs_por_vencer > 0 ? 'text-yellow-500' : 'text-gray-500',
+  },
+];
+
+const envioStats = [
+  {
+    name: 'Pendientes',
+    value: stats.envios_pendientes,
+    icon: Clock,
+    color: 'text-yellow-500',
+  },
+  {
+    name: 'Aceptados',
+    value: stats.envios_aceptados,
+    icon: CheckCircle,
+    color: 'text-green-500',
+  },
+  {
+    name: 'Rechazados',
+    value: stats.envios_rechazados,
+    icon: AlertTriangle,
+    color: stats.envios_rechazados > 0 ? 'text-red-500' : 'text-gray-500',
+  },
+];
+---
+
+<Layout title="Dashboard">
+  <div class="space-y-8">
+    <!-- Stats principales -->
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {cards.map((item) => (
+        <div class="rounded-xl border bg-card text-card-foreground shadow hover:bg-muted/50 transition-colors">
+          {item.href ? (
+            <a href={item.href}>
+              <div class="p-6">
+                <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div class="tracking-tight text-sm font-medium text-muted-foreground">{item.name}</div>
+                  <item.icon class={`h-5 w-5 ${item.color}`} />
+                </div>
+                <div class="pt-0">
+                  <div class="text-2xl font-bold">{item.value}</div>
+                </div>
+              </div>
+            </a>
+          ) : (
+            <div class="p-6">
+              <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                <div class="tracking-tight text-sm font-medium text-muted-foreground">{item.name}</div>
+                <item.icon class={`h-5 w-5 ${item.color}`} />
+              </div>
+              <div class="pt-0">
+                <div class="text-2xl font-bold">{item.value}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    <!-- Estado de Envios -->
+    <section class="space-y-4">
+      <h3 class="text-xl font-semibold">Estado de Envios al SII</h3>
+      <div class="grid gap-4 md:grid-cols-3">
+        {envioStats.map((item) => (
+          <div class="rounded-xl border bg-card text-card-foreground shadow p-6">
+            <div class="flex flex-row items-center justify-between">
+              <div>
+                <p class="text-sm text-muted-foreground">{item.name}</p>
+                <p class="text-3xl font-bold">{item.value}</p>
+              </div>
+              <item.icon class={`h-8 w-8 ${item.color}`} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Acciones Rapidas -->
+    <section class="space-y-4">
+      <h3 class="text-xl font-semibold">Acciones Rapidas</h3>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <a href="/admin/dte/factura" class="rounded-xl border bg-card p-6 hover:bg-muted/50 transition-colors">
+          <FileText class="h-8 w-8 text-primary mb-2" />
+          <h4 class="font-semibold">Nueva Factura</h4>
+          <p class="text-sm text-muted-foreground">Generar factura electronica</p>
+        </a>
+        <a href="/admin/dte/boleta" class="rounded-xl border bg-card p-6 hover:bg-muted/50 transition-colors">
+          <FileText class="h-8 w-8 text-primary mb-2" />
+          <h4 class="font-semibold">Nueva Boleta</h4>
+          <p class="text-sm text-muted-foreground">Generar boleta electronica</p>
+        </a>
+        <a href="/admin/caf" class="rounded-xl border bg-card p-6 hover:bg-muted/50 transition-colors">
+          <FolderKey class="h-8 w-8 text-primary mb-2" />
+          <h4 class="font-semibold">Cargar CAF</h4>
+          <p class="text-sm text-muted-foreground">Subir archivo de folios</p>
+        </a>
+        <a href="/admin/rcof" class="rounded-xl border bg-card p-6 hover:bg-muted/50 transition-colors">
+          <FileBarChart class="h-8 w-8 text-primary mb-2" />
+          <h4 class="font-semibold">Generar RCOF</h4>
+          <p class="text-sm text-muted-foreground">Reporte consumo de folios</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- Info del ambiente -->
+    <section class="rounded-xl border bg-muted/30 p-4">
+      <div class="flex items-center gap-2">
+        <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
+        <span class="text-sm font-medium">Ambiente: CERTIFICACION</span>
+        <span class="text-sm text-muted-foreground">- Los documentos se envian al ambiente de pruebas del SII</span>
+      </div>
+    </section>
+  </div>
+</Layout>

@@ -1,0 +1,168 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { Send, CheckCircle, Clock, XCircle, AlertTriangle, RefreshCw } from 'lucide-react';
+
+// TODO: Obtener de la API real
+const envios = [
+  {
+    id: '1',
+    tipo: 'DTE',
+    track_id: '123456789',
+    estado: 'ACEPTADO',
+    glosa: 'Documento recibido conforme',
+    fecha_envio: '2024-01-15T10:30:00',
+    fecha_respuesta: '2024-01-15T10:35:00',
+    cantidad_dte: 5,
+    cantidad_aceptados: 5,
+    cantidad_rechazados: 0,
+  },
+  {
+    id: '2',
+    tipo: 'DTE',
+    track_id: '987654321',
+    estado: 'ENVIADO',
+    glosa: 'Procesando',
+    fecha_envio: '2024-01-16T09:00:00',
+    fecha_respuesta: null,
+    cantidad_dte: 3,
+    cantidad_aceptados: 0,
+    cantidad_rechazados: 0,
+  },
+  {
+    id: '3',
+    tipo: 'RCOF',
+    track_id: '456789123',
+    estado: 'RECHAZADO',
+    glosa: 'Error en secuencia de envio',
+    fecha_envio: '2024-01-14T14:00:00',
+    fecha_respuesta: '2024-01-14T14:05:00',
+    cantidad_dte: 1,
+    cantidad_aceptados: 0,
+    cantidad_rechazados: 1,
+  },
+];
+
+const getStatusConfig = (estado: string) => {
+  switch (estado) {
+    case 'ACEPTADO':
+      return { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-950/20' };
+    case 'ENVIADO':
+      return { icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-50 dark:bg-yellow-950/20' };
+    case 'RECHAZADO':
+      return { icon: XCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-950/20' };
+    case 'REPARO':
+      return { icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-950/20' };
+    default:
+      return { icon: Send, color: 'text-gray-500', bg: 'bg-gray-50 dark:bg-gray-950/20' };
+  }
+};
+---
+
+<Layout title="Envios al SII">
+  <div class="space-y-6">
+    <p class="text-muted-foreground">
+      Historial de envios de documentos al Servicio de Impuestos Internos.
+    </p>
+
+    <!-- Estadisticas -->
+    <div class="grid gap-4 md:grid-cols-4">
+      <div class="rounded-xl border p-4">
+        <div class="flex items-center gap-2 text-muted-foreground">
+          <Send class="h-4 w-4" />
+          <span class="text-sm">Total Envios</span>
+        </div>
+        <p class="text-2xl font-bold mt-1">{envios.length}</p>
+      </div>
+      <div class="rounded-xl border p-4">
+        <div class="flex items-center gap-2 text-green-500">
+          <CheckCircle class="h-4 w-4" />
+          <span class="text-sm">Aceptados</span>
+        </div>
+        <p class="text-2xl font-bold mt-1">{envios.filter(e => e.estado === 'ACEPTADO').length}</p>
+      </div>
+      <div class="rounded-xl border p-4">
+        <div class="flex items-center gap-2 text-yellow-500">
+          <Clock class="h-4 w-4" />
+          <span class="text-sm">Pendientes</span>
+        </div>
+        <p class="text-2xl font-bold mt-1">{envios.filter(e => e.estado === 'ENVIADO').length}</p>
+      </div>
+      <div class="rounded-xl border p-4">
+        <div class="flex items-center gap-2 text-red-500">
+          <XCircle class="h-4 w-4" />
+          <span class="text-sm">Rechazados</span>
+        </div>
+        <p class="text-2xl font-bold mt-1">{envios.filter(e => e.estado === 'RECHAZADO').length}</p>
+      </div>
+    </div>
+
+    <!-- Tabla de envios -->
+    <div class="rounded-xl border">
+      <table class="w-full">
+        <thead class="bg-muted/50">
+          <tr>
+            <th class="px-4 py-3 text-left text-sm font-medium">Tipo</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Track ID</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Estado</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">DTEs</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Fecha Envio</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Glosa</th>
+            <th class="px-4 py-3 text-left text-sm font-medium">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          {envios.map((envio) => {
+            const status = getStatusConfig(envio.estado);
+            const StatusIcon = status.icon;
+
+            return (
+              <tr class="hover:bg-muted/30">
+                <td class="px-4 py-3">
+                  <span class="text-sm font-medium">{envio.tipo}</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="text-sm font-mono">{envio.track_id}</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span class={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${status.bg} ${status.color}`}>
+                    <StatusIcon class="h-3 w-3" />
+                    {envio.estado}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-sm">
+                  {envio.cantidad_dte > 0 && (
+                    <span>
+                      {envio.cantidad_aceptados}/{envio.cantidad_dte}
+                      {envio.cantidad_rechazados > 0 && (
+                        <span class="text-red-500 ml-1">({envio.cantidad_rechazados} rech.)</span>
+                      )}
+                    </span>
+                  )}
+                </td>
+                <td class="px-4 py-3 text-sm text-muted-foreground">
+                  {new Date(envio.fecha_envio).toLocaleString('es-CL')}
+                </td>
+                <td class="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate">
+                  {envio.glosa}
+                </td>
+                <td class="px-4 py-3">
+                  <div class="flex gap-2">
+                    <a href={`/admin/envios/${envio.id}`} class="text-sm text-primary hover:underline">
+                      Ver
+                    </a>
+                    {envio.estado === 'ENVIADO' && (
+                      <button class="text-sm text-primary hover:underline flex items-center gap-1">
+                        <RefreshCw class="h-3 w-3" />
+                        Actualizar
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</Layout>

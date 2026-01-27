@@ -1,0 +1,134 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { buttonVariants } from '@/components/ui/button';
+import { Upload, FolderKey, AlertTriangle, CheckCircle } from 'lucide-react';
+
+// TODO: Obtener de la API real
+const cafs = [
+  {
+    id: '1',
+    tipo_dte: 33,
+    tipo_nombre: 'Factura Electronica',
+    rango_desde: 1,
+    rango_hasta: 100,
+    folios_disponibles: 45,
+    fecha_autorizacion: '2024-01-01',
+    estado: 'ACTIVO',
+  },
+  {
+    id: '2',
+    tipo_dte: 39,
+    tipo_nombre: 'Boleta Electronica',
+    rango_desde: 1,
+    rango_hasta: 500,
+    folios_disponibles: 12,
+    fecha_autorizacion: '2024-01-01',
+    estado: 'ACTIVO',
+  },
+  {
+    id: '3',
+    tipo_dte: 61,
+    tipo_nombre: 'Nota de Credito',
+    rango_desde: 1,
+    rango_hasta: 50,
+    folios_disponibles: 50,
+    fecha_autorizacion: '2024-01-05',
+    estado: 'ACTIVO',
+  },
+];
+
+const getStatusColor = (disponibles: number, total: number) => {
+  const porcentaje = (disponibles / total) * 100;
+  if (porcentaje <= 10) return 'text-red-500';
+  if (porcentaje <= 25) return 'text-yellow-500';
+  return 'text-green-500';
+};
+
+const getProgressColor = (disponibles: number, total: number) => {
+  const porcentaje = (disponibles / total) * 100;
+  if (porcentaje <= 10) return 'bg-red-500';
+  if (porcentaje <= 25) return 'bg-yellow-500';
+  return 'bg-green-500';
+};
+---
+
+<Layout title="Folios (CAF)">
+  <Fragment slot="actions">
+    <a href="/admin/caf/cargar" class={buttonVariants()}>
+      <Upload class="mr-2 h-4 w-4" /> Cargar CAF
+    </a>
+  </Fragment>
+
+  <div class="space-y-6">
+    <p class="text-muted-foreground">
+      Codigos de Autorizacion de Folios para emision de documentos.
+    </p>
+
+    <!-- Resumen de folios -->
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {cafs.map((caf) => {
+        const total = caf.rango_hasta - caf.rango_desde + 1;
+        const usados = total - caf.folios_disponibles;
+        const porcentajeUsado = (usados / total) * 100;
+
+        return (
+          <div class="rounded-xl border bg-card p-6 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <FolderKey class="h-5 w-5 text-primary" />
+                <span class="font-semibold">{caf.tipo_nombre}</span>
+              </div>
+              <span class={`text-sm font-medium ${getStatusColor(caf.folios_disponibles, total)}`}>
+                {caf.folios_disponibles} disponibles
+              </span>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm text-muted-foreground">
+                <span>Rango: {caf.rango_desde} - {caf.rango_hasta}</span>
+                <span>{usados} / {total} usados</span>
+              </div>
+              <div class="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  class={`h-full ${getProgressColor(caf.folios_disponibles, total)}`}
+                  style={`width: ${porcentajeUsado}%`}
+                />
+              </div>
+            </div>
+
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-muted-foreground">
+                Autorizado: {new Date(caf.fecha_autorizacion).toLocaleDateString('es-CL')}
+              </span>
+              {caf.folios_disponibles <= total * 0.1 && (
+                <span class="flex items-center gap-1 text-red-500">
+                  <AlertTriangle class="h-4 w-4" />
+                  Bajo
+                </span>
+              )}
+              {caf.folios_disponibles > total * 0.1 && (
+                <span class="flex items-center gap-1 text-green-500">
+                  <CheckCircle class="h-4 w-4" />
+                  OK
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Alerta si hay CAFs bajos -->
+    {cafs.some(caf => caf.folios_disponibles <= (caf.rango_hasta - caf.rango_desde + 1) * 0.1) && (
+      <div class="rounded-xl border border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20 p-4">
+        <div class="flex items-center gap-2 text-yellow-700 dark:text-yellow-500">
+          <AlertTriangle class="h-5 w-5" />
+          <span class="font-medium">Atencion: Algunos CAFs tienen pocos folios disponibles</span>
+        </div>
+        <p class="text-sm text-yellow-600 dark:text-yellow-400 mt-1">
+          Considera cargar nuevos CAFs para evitar interrupciones en la emision de documentos.
+        </p>
+      </div>
+    )}
+  </div>
+</Layout>
