@@ -19,13 +19,7 @@ export default defineConfig({
   integrations: [react(), tailwind({ applyBaseStyles: true })],
   output: "server",
   vite: {
-    resolve: {
-      alias: import.meta.env.PROD && {
-        "react-dom/server": "react-dom/server.edge",
-      },
-    },
     define: {
-      // Exponer variables de entorno al cliente
       "import.meta.env.PUBLIC_API_URL": JSON.stringify(
         process.env.API_URL || "http://localhost:8080"
       ),
