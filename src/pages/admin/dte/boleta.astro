@@ -1,0 +1,21 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { BoletaForm } from '@/components/sii/boleta-form';
+import { ArrowLeft } from 'lucide-react';
+
+const empresaId = Astro.url.searchParams.get('empresa');
+---
+
+<Layout title="Nueva Boleta Electronica">
+  <div class="max-w-3xl">
+    <a href="/admin/dte" class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+      <ArrowLeft class="mr-1 h-4 w-4" /> Volver a DTEs
+    </a>
+
+    <p class="text-muted-foreground mb-6">
+      Genera una nueva boleta electronica (Tipo 39). Las boletas no requieren datos del receptor.
+    </p>
+
+    <BoletaForm empresaId={empresaId} client:load />
+  </div>
+</Layout>

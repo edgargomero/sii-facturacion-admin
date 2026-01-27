@@ -1,0 +1,21 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { FacturaForm } from '@/components/sii/factura-form';
+import { ArrowLeft } from 'lucide-react';
+
+const empresaId = Astro.url.searchParams.get('empresa');
+---
+
+<Layout title="Nueva Factura Electronica">
+  <div class="max-w-4xl">
+    <a href="/admin/dte" class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+      <ArrowLeft class="mr-1 h-4 w-4" /> Volver a DTEs
+    </a>
+
+    <p class="text-muted-foreground mb-6">
+      Genera una nueva factura electronica (Tipo 33).
+    </p>
+
+    <FacturaForm empresaId={empresaId} client:load />
+  </div>
+</Layout>

@@ -1,0 +1,37 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { EmpresaForm } from '@/components/sii/empresa-form';
+import { ArrowLeft } from 'lucide-react';
+
+const { id } = Astro.params;
+
+// TODO: Obtener de la API real
+const empresa = {
+  rut: '76.XXX.XXX-X',
+  razon_social: 'Empresa Demo SpA',
+  giro: 'Servicios de software y desarrollo',
+  direccion: 'Av. Principal 123, Of. 456',
+  comuna: 'Santiago',
+  ciudad: 'Santiago',
+  acteco: '620100',
+  telefono: '+56 9 1234 5678',
+  email: 'contacto@empresa.cl',
+  resolucion_numero: 80,
+  resolucion_fecha: '2024-01-01',
+  ambiente: 'CERTIFICACION' as const,
+};
+---
+
+<Layout title="Editar Empresa">
+  <div class="max-w-2xl">
+    <a href={`/admin/empresas/${id}`} class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6">
+      <ArrowLeft class="mr-1 h-4 w-4" /> Volver al detalle
+    </a>
+
+    <p class="text-muted-foreground mb-6">
+      Modifica los datos de la empresa.
+    </p>
+
+    <EmpresaForm initialData={empresa} client:load />
+  </div>
+</Layout>

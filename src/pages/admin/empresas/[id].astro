@@ -1,0 +1,151 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { buttonVariants } from '@/components/ui/button';
+import { Pencil, ArrowLeft, Building2, FileText, FolderKey, Shield } from 'lucide-react';
+
+const { id } = Astro.params;
+
+// TODO: Obtener de la API real
+const empresa = {
+  id: id,
+  rut: '76.XXX.XXX-X',
+  razon_social: 'Empresa Demo SpA',
+  giro: 'Servicios de software y desarrollo',
+  direccion: 'Av. Principal 123, Of. 456',
+  comuna: 'Santiago',
+  ciudad: 'Santiago',
+  acteco: '620100',
+  telefono: '+56 9 1234 5678',
+  email: 'contacto@empresa.cl',
+  resolucion_numero: 80,
+  resolucion_fecha: '2024-01-01',
+  ambiente: 'CERTIFICACION',
+  activa: true,
+  created_at: '2024-01-01T10:00:00',
+};
+
+const stats = {
+  dtes_emitidos: 156,
+  cafs_activos: 4,
+  certificado_vigente: true,
+};
+---
+
+<Layout title={empresa.razon_social}>
+  <Fragment slot="actions">
+    <a href={`/admin/empresas/${id}/editar`} class={buttonVariants()}>
+      <Pencil class="mr-2 h-4 w-4" /> Editar
+    </a>
+  </Fragment>
+
+  <div class="space-y-6">
+    <a href="/admin/empresas" class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+      <ArrowLeft class="mr-1 h-4 w-4" /> Volver a empresas
+    </a>
+
+    <!-- Info principal -->
+    <div class="grid gap-6 md:grid-cols-3">
+      <div class="md:col-span-2 space-y-6">
+        <div class="rounded-xl border p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <Building2 class="h-8 w-8 text-primary" />
+            <div>
+              <h3 class="text-xl font-semibold">{empresa.razon_social}</h3>
+              <p class="text-muted-foreground font-mono">{empresa.rut}</p>
+            </div>
+            <span class={`ml-auto px-3 py-1 rounded-full text-sm font-medium ${
+              empresa.ambiente === 'PRODUCCION'
+                ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
+                : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400'
+            }`}>
+              {empresa.ambiente}
+            </span>
+          </div>
+
+          <dl class="grid gap-4 md:grid-cols-2 text-sm">
+            <div>
+              <dt class="text-muted-foreground">Giro</dt>
+              <dd class="font-medium">{empresa.giro}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Codigo Actividad</dt>
+              <dd class="font-medium font-mono">{empresa.acteco || '-'}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Direccion</dt>
+              <dd class="font-medium">{empresa.direccion}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Comuna / Ciudad</dt>
+              <dd class="font-medium">{empresa.comuna}, {empresa.ciudad}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Telefono</dt>
+              <dd class="font-medium">{empresa.telefono || '-'}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Email</dt>
+              <dd class="font-medium">{empresa.email || '-'}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Resolucion SII</dt>
+              <dd class="font-medium">N° {empresa.resolucion_numero} del {new Date(empresa.resolucion_fecha).toLocaleDateString('es-CL')}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Registrada</dt>
+              <dd class="font-medium">{new Date(empresa.created_at).toLocaleDateString('es-CL')}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="space-y-4">
+        <div class="rounded-xl border p-4">
+          <div class="flex items-center gap-2 text-muted-foreground mb-1">
+            <FileText class="h-4 w-4" />
+            <span class="text-sm">DTEs Emitidos</span>
+          </div>
+          <p class="text-2xl font-bold">{stats.dtes_emitidos}</p>
+        </div>
+
+        <div class="rounded-xl border p-4">
+          <div class="flex items-center gap-2 text-muted-foreground mb-1">
+            <FolderKey class="h-4 w-4" />
+            <span class="text-sm">CAFs Activos</span>
+          </div>
+          <p class="text-2xl font-bold">{stats.cafs_activos}</p>
+        </div>
+
+        <div class="rounded-xl border p-4">
+          <div class="flex items-center gap-2 text-muted-foreground mb-1">
+            <Shield class="h-4 w-4" />
+            <span class="text-sm">Certificado Digital</span>
+          </div>
+          <p class={`text-lg font-bold ${stats.certificado_vigente ? 'text-green-600' : 'text-red-600'}`}>
+            {stats.certificado_vigente ? 'Vigente' : 'No configurado'}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones rapidas -->
+    <div class="rounded-xl border p-6">
+      <h3 class="font-semibold mb-4">Acciones</h3>
+      <div class="flex flex-wrap gap-3">
+        <a href={`/admin/dte/factura?empresa=${id}`} class={buttonVariants({ variant: 'outline' })}>
+          <FileText class="mr-2 h-4 w-4" /> Nueva Factura
+        </a>
+        <a href={`/admin/dte/boleta?empresa=${id}`} class={buttonVariants({ variant: 'outline' })}>
+          <FileText class="mr-2 h-4 w-4" /> Nueva Boleta
+        </a>
+        <a href={`/admin/caf?empresa=${id}`} class={buttonVariants({ variant: 'outline' })}>
+          <FolderKey class="mr-2 h-4 w-4" /> Ver CAFs
+        </a>
+        <a href={`/admin/empresas/${id}/certificado`} class={buttonVariants({ variant: 'outline' })}>
+          <Shield class="mr-2 h-4 w-4" /> Certificado Digital
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>

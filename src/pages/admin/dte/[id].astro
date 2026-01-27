@@ -1,0 +1,242 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { buttonVariants } from '@/components/ui/button';
+import {
+  ArrowLeft,
+  FileText,
+  Download,
+  Send,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Printer,
+  Copy
+} from 'lucide-react';
+
+const { id } = Astro.params;
+
+const TIPOS_DTE: Record<number, string> = {
+  33: 'Factura Electronica',
+  34: 'Factura Exenta',
+  39: 'Boleta Electronica',
+  41: 'Boleta Exenta',
+  52: 'Guia de Despacho',
+  56: 'Nota de Debito',
+  61: 'Nota de Credito',
+};
+
+// TODO: Obtener de la API real
+const dte = {
+  id: id,
+  tipo_dte: 33,
+  folio: 123,
+  fecha_emision: '2024-01-15',
+  receptor_rut: '12.345.678-9',
+  receptor_razon_social: 'Cliente Ejemplo SpA',
+  receptor_giro: 'Comercio',
+  receptor_direccion: 'Av. Ejemplo 456',
+  receptor_comuna: 'Providencia',
+  monto_neto: 100000,
+  monto_iva: 19000,
+  monto_exento: 0,
+  monto_total: 119000,
+  estado: 'ACEPTADO',
+  track_id: '123456789',
+  created_at: '2024-01-15T10:30:00',
+  detalles: [
+    { nombre: 'Servicio de desarrollo', cantidad: 10, precio_unitario: 10000, total: 100000 },
+  ],
+};
+
+const formatMoney = (value: number) => {
+  return new Intl.NumberFormat('es-CL', {
+    style: 'currency',
+    currency: 'CLP',
+    minimumFractionDigits: 0,
+  }).format(value);
+};
+
+const getStatusConfig = (estado: string) => {
+  switch (estado) {
+    case 'ACEPTADO':
+      return { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-100 dark:bg-green-950' };
+    case 'ENVIADO':
+      return { icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-100 dark:bg-yellow-950' };
+    case 'RECHAZADO':
+      return { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-950' };
+    default:
+      return { icon: FileText, color: 'text-gray-600', bg: 'bg-gray-100 dark:bg-gray-950' };
+  }
+};
+
+const status = getStatusConfig(dte.estado);
+const StatusIcon = status.icon;
+---
+
+<Layout title={`${TIPOS_DTE[dte.tipo_dte]} #${dte.folio}`}>
+  <Fragment slot="actions">
+    <div class="flex gap-2">
+      <button class={buttonVariants({ variant: 'outline' })}>
+        <Download class="mr-2 h-4 w-4" /> Descargar PDF
+      </button>
+      <button class={buttonVariants({ variant: 'outline' })}>
+        <Printer class="mr-2 h-4 w-4" /> Imprimir
+      </button>
+      {dte.estado === 'GENERADO' && (
+        <button class={buttonVariants()}>
+          <Send class="mr-2 h-4 w-4" /> Enviar al SII
+        </button>
+      )}
+    </div>
+  </Fragment>
+
+  <div class="space-y-6">
+    <a href="/admin/dte" class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+      <ArrowLeft class="mr-1 h-4 w-4" /> Volver a DTEs
+    </a>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+      <!-- Info principal -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Cabecera -->
+        <div class="rounded-xl border p-6">
+          <div class="flex items-start justify-between mb-6">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <FileText class="h-6 w-6 text-primary" />
+                <h3 class="text-xl font-semibold">{TIPOS_DTE[dte.tipo_dte]}</h3>
+              </div>
+              <p class="text-3xl font-bold">#{dte.folio}</p>
+            </div>
+            <span class={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${status.bg} ${status.color}`}>
+              <StatusIcon class="h-4 w-4" />
+              {dte.estado}
+            </span>
+          </div>
+
+          <dl class="grid gap-4 md:grid-cols-2 text-sm">
+            <div>
+              <dt class="text-muted-foreground">Fecha Emision</dt>
+              <dd class="font-medium">{new Date(dte.fecha_emision).toLocaleDateString('es-CL')}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Track ID SII</dt>
+              <dd class="font-medium font-mono">{dte.track_id || '-'}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Receptor -->
+        <div class="rounded-xl border p-6">
+          <h4 class="font-semibold mb-4">Receptor</h4>
+          <dl class="grid gap-4 md:grid-cols-2 text-sm">
+            <div>
+              <dt class="text-muted-foreground">RUT</dt>
+              <dd class="font-medium font-mono">{dte.receptor_rut}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Razon Social</dt>
+              <dd class="font-medium">{dte.receptor_razon_social}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Giro</dt>
+              <dd class="font-medium">{dte.receptor_giro || '-'}</dd>
+            </div>
+            <div>
+              <dt class="text-muted-foreground">Comuna</dt>
+              <dd class="font-medium">{dte.receptor_comuna || '-'}</dd>
+            </div>
+            <div class="md:col-span-2">
+              <dt class="text-muted-foreground">Direccion</dt>
+              <dd class="font-medium">{dte.receptor_direccion || '-'}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- Detalle -->
+        <div class="rounded-xl border p-6">
+          <h4 class="font-semibold mb-4">Detalle</h4>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b">
+                <th class="text-left py-2 font-medium">Descripcion</th>
+                <th class="text-right py-2 font-medium">Cant.</th>
+                <th class="text-right py-2 font-medium">P. Unit.</th>
+                <th class="text-right py-2 font-medium">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dte.detalles.map((det) => (
+                <tr class="border-b">
+                  <td class="py-3">{det.nombre}</td>
+                  <td class="py-3 text-right">{det.cantidad}</td>
+                  <td class="py-3 text-right">{formatMoney(det.precio_unitario)}</td>
+                  <td class="py-3 text-right font-medium">{formatMoney(det.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Totales y acciones -->
+      <div class="space-y-6">
+        <div class="rounded-xl border p-6">
+          <h4 class="font-semibold mb-4">Totales</h4>
+          <dl class="space-y-3 text-sm">
+            <div class="flex justify-between">
+              <dt class="text-muted-foreground">Neto</dt>
+              <dd class="font-medium">{formatMoney(dte.monto_neto)}</dd>
+            </div>
+            {dte.monto_exento > 0 && (
+              <div class="flex justify-between">
+                <dt class="text-muted-foreground">Exento</dt>
+                <dd class="font-medium">{formatMoney(dte.monto_exento)}</dd>
+              </div>
+            )}
+            <div class="flex justify-between">
+              <dt class="text-muted-foreground">IVA (19%)</dt>
+              <dd class="font-medium">{formatMoney(dte.monto_iva)}</dd>
+            </div>
+            <div class="flex justify-between border-t pt-3 text-lg">
+              <dt class="font-semibold">Total</dt>
+              <dd class="font-bold">{formatMoney(dte.monto_total)}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="rounded-xl border p-6">
+          <h4 class="font-semibold mb-4">Descargas</h4>
+          <div class="space-y-2">
+            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors">
+              <Download class="h-4 w-4" />
+              Descargar XML
+            </button>
+            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors">
+              <Download class="h-4 w-4" />
+              Descargar PDF
+            </button>
+            <button class="w-full flex items-center justify-center gap-2 px-4 py-2 border rounded-lg hover:bg-muted transition-colors">
+              <Copy class="h-4 w-4" />
+              Copiar Timbre
+            </button>
+          </div>
+        </div>
+
+        <div class="rounded-xl border p-6">
+          <h4 class="font-semibold mb-4">Informacion</h4>
+          <dl class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <dt class="text-muted-foreground">Creado</dt>
+              <dd>{new Date(dte.created_at).toLocaleString('es-CL')}</dd>
+            </div>
+            <div class="flex justify-between">
+              <dt class="text-muted-foreground">ID interno</dt>
+              <dd class="font-mono text-xs">{dte.id}</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
