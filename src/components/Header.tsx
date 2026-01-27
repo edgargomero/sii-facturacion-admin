@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Send,
 } from "lucide-react";
+import { HelpDialog } from "@/components/sii/help-dialog";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -51,6 +52,9 @@ export function Header({ currentPath }: { currentPath: string }) {
           </a>
         );
       })}
+      <div className="ml-auto">
+        <HelpDialog />
+      </div>
     </nav>
   );
 }

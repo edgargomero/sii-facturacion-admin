@@ -1,0 +1,333 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import {
+  Building2,
+  ShieldCheck,
+  FolderKey,
+  FileText,
+  Send,
+  FileBarChart,
+  CheckCircle2,
+  AlertCircle,
+  Info,
+  ExternalLink,
+  ArrowRight,
+  ChevronRight
+} from 'lucide-react';
+---
+
+<Layout title="Guia de Usuario">
+  <div class="max-w-4xl mx-auto space-y-12">
+    <!-- Intro -->
+    <section class="text-center space-y-4">
+      <h1 class="text-4xl font-bold">Guia de Usuario</h1>
+      <p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+        Sistema de facturacion electronica para Chile conforme a las especificaciones del SII
+      </p>
+    </section>
+
+    <!-- Quick Start Flow -->
+    <section class="rounded-xl border bg-gradient-to-br from-primary/5 to-primary/10 p-8">
+      <h2 class="text-2xl font-semibold mb-6">Configuracion Inicial</h2>
+      <div class="grid md:grid-cols-4 gap-4">
+        <a href="/admin/empresas/nueva" class="group p-4 bg-background rounded-lg hover:shadow-md transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">1</div>
+            <Building2 class="h-5 w-5 text-primary" />
+          </div>
+          <h3 class="font-medium group-hover:text-primary transition-colors">Crear Empresa</h3>
+          <p class="text-sm text-muted-foreground mt-1">Registra datos de la empresa emisora</p>
+        </a>
+        <a href="/admin/empresas" class="group p-4 bg-background rounded-lg hover:shadow-md transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">2</div>
+            <ShieldCheck class="h-5 w-5 text-primary" />
+          </div>
+          <h3 class="font-medium group-hover:text-primary transition-colors">Subir Certificado</h3>
+          <p class="text-sm text-muted-foreground mt-1">Carga tu certificado digital .pfx</p>
+        </a>
+        <a href="/admin/caf/cargar" class="group p-4 bg-background rounded-lg hover:shadow-md transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">3</div>
+            <FolderKey class="h-5 w-5 text-primary" />
+          </div>
+          <h3 class="font-medium group-hover:text-primary transition-colors">Cargar CAFs</h3>
+          <p class="text-sm text-muted-foreground mt-1">Sube los archivos de folios XML</p>
+        </a>
+        <a href="/admin/dte/factura" class="group p-4 bg-background rounded-lg hover:shadow-md transition-all">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">4</div>
+            <FileText class="h-5 w-5 text-primary" />
+          </div>
+          <h3 class="font-medium group-hover:text-primary transition-colors">Emitir Documentos</h3>
+          <p class="text-sm text-muted-foreground mt-1">Genera facturas y boletas</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- Requisitos -->
+    <section class="space-y-4">
+      <h2 class="text-2xl font-semibold">Requisitos Previos</h2>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="p-4 border rounded-lg">
+          <ShieldCheck class="h-6 w-6 text-primary mb-2" />
+          <h3 class="font-medium">Certificado Digital</h3>
+          <p class="text-sm text-muted-foreground mt-1">Archivo .pfx o .p12 valido de E-Sign, E-Cert, Acepta u otro proveedor autorizado</p>
+        </div>
+        <div class="p-4 border rounded-lg">
+          <FolderKey class="h-6 w-6 text-primary mb-2" />
+          <h3 class="font-medium">Archivos CAF</h3>
+          <p class="text-sm text-muted-foreground mt-1">XML de folios autorizados por tipo de documento, obtenidos del portal SII</p>
+        </div>
+        <div class="p-4 border rounded-lg">
+          <FileText class="h-6 w-6 text-primary mb-2" />
+          <h3 class="font-medium">Datos Resolucion</h3>
+          <p class="text-sm text-muted-foreground mt-1">Numero y fecha de resolucion SII (0 para ambiente de certificacion)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ambientes -->
+    <section class="space-y-4">
+      <h2 class="text-2xl font-semibold">Ambientes SII</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="p-6 border rounded-lg border-yellow-500/50 bg-yellow-500/5">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+            <h3 class="font-semibold">CERTIFICACION</h3>
+          </div>
+          <p class="text-sm text-muted-foreground mb-3">Ambiente de pruebas para desarrollo y certificacion</p>
+          <ul class="text-sm space-y-1">
+            <li class="flex items-center gap-2"><ChevronRight class="h-3 w-3 text-yellow-500" /> Numero Resolucion: <code class="bg-muted px-1 rounded">0</code></li>
+            <li class="flex items-center gap-2"><ChevronRight class="h-3 w-3 text-yellow-500" /> Documentos no tienen validez tributaria</li>
+            <li class="flex items-center gap-2"><ChevronRight class="h-3 w-3 text-yellow-500" /> Portal: maullin.sii.cl</li>
+          </ul>
+        </div>
+        <div class="p-6 border rounded-lg border-green-500/50 bg-green-500/5">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="h-3 w-3 rounded-full bg-green-500"></div>
+            <h3 class="font-semibold">PRODUCCION</h3>
+          </div>
+          <p class="text-sm text-muted-foreground mb-3">Ambiente real para documentos con validez tributaria</p>
+          <ul class="text-sm space-y-1">
+            <li class="flex items-center gap-2"><ChevronRight class="h-3 w-3 text-green-500" /> Numero Resolucion: Numero real</li>
+            <li class="flex items-center gap-2"><ChevronRight class="h-3 w-3 text-green-500" /> Documentos tienen validez legal</li>
+            <li class="flex items-center gap-2"><ChevronRight class="h-3 w-3 text-green-500" /> Portal: palena.sii.cl</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tipos de Documento -->
+    <section class="space-y-4">
+      <h2 class="text-2xl font-semibold">Tipos de Documento (DTE)</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full border rounded-lg">
+          <thead class="bg-muted">
+            <tr>
+              <th class="px-4 py-3 text-left font-medium">Codigo</th>
+              <th class="px-4 py-3 text-left font-medium">Tipo</th>
+              <th class="px-4 py-3 text-left font-medium">Descripcion</th>
+              <th class="px-4 py-3 text-left font-medium">Uso</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y">
+            <tr>
+              <td class="px-4 py-3 font-mono text-primary">33</td>
+              <td class="px-4 py-3 font-medium">Factura Electronica</td>
+              <td class="px-4 py-3 text-muted-foreground">Documento con IVA</td>
+              <td class="px-4 py-3 text-muted-foreground">Venta B2B</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-mono text-primary">34</td>
+              <td class="px-4 py-3 font-medium">Factura Exenta</td>
+              <td class="px-4 py-3 text-muted-foreground">Sin IVA</td>
+              <td class="px-4 py-3 text-muted-foreground">Productos exentos</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-mono text-primary">39</td>
+              <td class="px-4 py-3 font-medium">Boleta Electronica</td>
+              <td class="px-4 py-3 text-muted-foreground">Venta a consumidor final</td>
+              <td class="px-4 py-3 text-muted-foreground">Venta B2C</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-mono text-primary">41</td>
+              <td class="px-4 py-3 font-medium">Boleta Exenta</td>
+              <td class="px-4 py-3 text-muted-foreground">Sin IVA, consumidor final</td>
+              <td class="px-4 py-3 text-muted-foreground">Venta B2C exenta</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-mono text-primary">52</td>
+              <td class="px-4 py-3 font-medium">Guia de Despacho</td>
+              <td class="px-4 py-3 text-muted-foreground">Traslado de mercaderia</td>
+              <td class="px-4 py-3 text-muted-foreground">Logistica</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-mono text-primary">56</td>
+              <td class="px-4 py-3 font-medium">Nota de Debito</td>
+              <td class="px-4 py-3 text-muted-foreground">Aumentar monto facturado</td>
+              <td class="px-4 py-3 text-muted-foreground">Correcciones</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-mono text-primary">61</td>
+              <td class="px-4 py-3 font-medium">Nota de Credito</td>
+              <td class="px-4 py-3 text-muted-foreground">Anular o disminuir monto</td>
+              <td class="px-4 py-3 text-muted-foreground">Anulaciones</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Estados de Envio -->
+    <section class="space-y-4">
+      <h2 class="text-2xl font-semibold">Estados de Envio al SII</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="p-4 border rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+            <span class="font-medium">Pendiente</span>
+          </div>
+          <p class="text-sm text-muted-foreground">Documento no enviado al SII</p>
+        </div>
+        <div class="p-4 border rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="h-3 w-3 rounded-full bg-blue-500"></div>
+            <span class="font-medium">Enviado</span>
+          </div>
+          <p class="text-sm text-muted-foreground">Enviado, esperando respuesta</p>
+        </div>
+        <div class="p-4 border rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="h-3 w-3 rounded-full bg-green-500"></div>
+            <span class="font-medium">Aceptado</span>
+          </div>
+          <p class="text-sm text-muted-foreground">SII acepto el documento</p>
+        </div>
+        <div class="p-4 border rounded-lg">
+          <div class="flex items-center gap-2 mb-2">
+            <div class="h-3 w-3 rounded-full bg-red-500"></div>
+            <span class="font-medium">Rechazado</span>
+          </div>
+          <p class="text-sm text-muted-foreground">SII rechazo el documento</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- RCOF -->
+    <section class="space-y-4">
+      <h2 class="text-2xl font-semibold">RCOF - Reporte de Consumo de Folios</h2>
+      <div class="p-6 border rounded-lg">
+        <div class="flex items-start gap-4">
+          <FileBarChart class="h-8 w-8 text-primary flex-shrink-0" />
+          <div>
+            <p class="text-muted-foreground mb-4">
+              El RCOF es un informe <strong>obligatorio</strong> que se envia al SII con el resumen de boletas emitidas.
+            </p>
+            <div class="flex items-start gap-2 p-3 bg-blue-500/10 rounded-lg">
+              <Info class="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+              <p class="text-sm text-blue-600 dark:text-blue-400">
+                Debe enviarse <strong>diariamente</strong> o al menos antes del dia 15 del mes siguiente.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="space-y-4">
+      <h2 class="text-2xl font-semibold">Preguntas Frecuentes</h2>
+      <div class="space-y-4">
+        <div class="p-4 border rounded-lg">
+          <h3 class="font-medium flex items-center gap-2">
+            <AlertCircle class="h-4 w-4 text-yellow-500" />
+            No puedo crear documentos
+          </h3>
+          <div class="mt-2 text-sm text-muted-foreground space-y-1">
+            <p>Verifica que:</p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>La empresa tiene certificado digital cargado y vigente</li>
+              <li>La empresa tiene CAFs cargados para el tipo de documento</li>
+              <li>Los CAFs tienen folios disponibles</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="p-4 border rounded-lg">
+          <h3 class="font-medium flex items-center gap-2">
+            <Info class="h-4 w-4 text-blue-500" />
+            Como se si el SII acepto mi documento?
+          </h3>
+          <p class="mt-2 text-sm text-muted-foreground">
+            Ve a "Envios SII" y busca el envio por Track ID. El estado debe ser "Aceptado".
+          </p>
+        </div>
+
+        <div class="p-4 border rounded-lg">
+          <h3 class="font-medium flex items-center gap-2">
+            <Info class="h-4 w-4 text-blue-500" />
+            Puedo anular un documento?
+          </h3>
+          <p class="mt-2 text-sm text-muted-foreground">
+            No directamente. Debes emitir una <strong>Nota de Credito</strong> que anule el documento original.
+          </p>
+        </div>
+
+        <div class="p-4 border rounded-lg">
+          <h3 class="font-medium flex items-center gap-2">
+            <Info class="h-4 w-4 text-blue-500" />
+            Como cambio de CERTIFICACION a PRODUCCION?
+          </h3>
+          <ol class="mt-2 text-sm text-muted-foreground list-decimal pl-5 space-y-1">
+            <li>Completar el proceso de certificacion con el SII</li>
+            <li>Obtener resolucion de autorizacion</li>
+            <li>Editar la empresa y cambiar ambiente a PRODUCCION</li>
+            <li>Actualizar el numero de resolucion real</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Links SII -->
+    <section class="space-y-4">
+      <h2 class="text-2xl font-semibold">Enlaces del SII</h2>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <h3 class="font-medium text-yellow-600 dark:text-yellow-400">Certificacion (Pruebas)</h3>
+          <div class="space-y-2">
+            <a href="https://maullin.sii.cl/cvc_cgi/dte/of_solicita_folios" target="_blank" rel="noopener" class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+              <span class="text-sm">Solicitar Folios</span>
+              <ExternalLink class="h-4 w-4 text-muted-foreground" />
+            </a>
+            <a href="https://maullin.sii.cl/cgi_dte/UPL/DTEauth?1" target="_blank" rel="noopener" class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+              <span class="text-sm">Consultar Envios</span>
+              <ExternalLink class="h-4 w-4 text-muted-foreground" />
+            </a>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <h3 class="font-medium text-green-600 dark:text-green-400">Produccion</h3>
+          <div class="space-y-2">
+            <a href="https://palena.sii.cl/cvc_cgi/dte/of_solicita_folios" target="_blank" rel="noopener" class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+              <span class="text-sm">Solicitar Folios</span>
+              <ExternalLink class="h-4 w-4 text-muted-foreground" />
+            </a>
+            <a href="https://palena.sii.cl/cgi_dte/UPL/DTEauth?1" target="_blank" rel="noopener" class="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+              <span class="text-sm">Consultar Envios</span>
+              <ExternalLink class="h-4 w-4 text-muted-foreground" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <section class="text-center py-8 border-t">
+      <p class="text-sm text-muted-foreground">
+        Para mas informacion o reportar problemas, visita el
+        <a href="https://github.com/edgargomero/sii-facturacion-admin" target="_blank" rel="noopener" class="text-primary hover:underline">repositorio del proyecto</a>
+      </p>
+    </section>
+  </div>
+</Layout>

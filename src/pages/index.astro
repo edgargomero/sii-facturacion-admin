@@ -1,6 +1,6 @@
 ---
 import { buttonVariants } from '@/components/ui/button';
-import { FileText, LayoutDashboard, Github } from 'lucide-react';
+import { FileText, LayoutDashboard, Github, BookOpen } from 'lucide-react';
 import '@/styles/globals.css'
 
 const repoLink = 'https://github.com/tuusuario/sii-facturacion-go';
@@ -59,11 +59,14 @@ const repoLink = 'https://github.com/tuusuario/sii-facturacion-go';
         </div>
       </div>
 
-      <div class="flex gap-4 mt-8">
+      <div class="flex flex-wrap gap-4 mt-8 justify-center">
         <a class={buttonVariants({ size: 'lg' })} href="/admin">
           <LayoutDashboard className="mr-2 h-5 w-5" /> Ir al Panel Admin
         </a>
-        <a class={buttonVariants({ variant: 'outline', size: 'lg' })} href={repoLink}>
+        <a class={buttonVariants({ variant: 'outline', size: 'lg' })} href="/ayuda">
+          <BookOpen className="mr-2 h-5 w-5" /> Guia de Inicio
+        </a>
+        <a class={buttonVariants({ variant: 'ghost', size: 'lg' })} href={repoLink}>
           <Github className="mr-2 h-5 w-5" /> Ver en GitHub
         </a>
       </div>

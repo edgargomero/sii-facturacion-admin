@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import Layout from '@/layouts/Layout.astro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { OnboardingGuide } from '@/components/sii/onboarding-guide';
 
 // TODO: Obtener datos reales de la API
 // Por ahora usamos datos de ejemplo
@@ -86,6 +87,9 @@ const envioStats = [
 
 <Layout title="Dashboard">
   <div class="space-y-8">
+    <!-- Guia de Onboarding para nuevos usuarios -->
+    <OnboardingGuide client:load />
+
     <!-- Stats principales -->
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {cards.map((item) => (
