@@ -212,12 +212,51 @@ export interface ConsultaEstadoResponse {
 // AUTH
 // ===========================================
 export interface LoginRequest {
-  empresa_id: string;
-  api_key: string;
+  email: string;
+  password: string;
+}
+
+export interface SupabaseUser {
+  id: string;
+  email: string;
+  role?: string;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+}
+
+export interface Perfil {
+  id: string;
+  user_id: string;
+  nombre: string;
+  rol: "admin" | "usuario";
+  empresa_id?: string;
+  activo: boolean;
+  created_at: string;
+  updated_at: string;
+  empresa?: Empresa;
+}
+
+export interface AuthUser {
+  user: SupabaseUser;
+  perfil: Perfil;
 }
 
 export interface LoginResponse {
-  token: string;
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  user: SupabaseUser;
+  perfil: Perfil;
+}
+
+export interface RefreshTokenRequest {
+  refresh_token: string;
+}
+
+export interface RefreshTokenResponse {
+  access_token: string;
+  refresh_token: string;
   token_type: string;
   expires_in: number;
 }
