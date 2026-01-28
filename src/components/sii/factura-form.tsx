@@ -6,24 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Save, Plus, Trash2, FileText } from "lucide-react";
 import { dteService, empresasService } from "@/lib/sii-api";
 import type { Empresa } from "@/lib/sii-api";
+import { validarRUT } from "@/lib/sii-api/types";
 
 const detalleSchema = z.object({
-  nombre: z.string().min(1, "Nombre requerido"),
+  codigo: z.string().optional(),
+  nombre: z.string().min(1, "Nombre requerido").max(80, "Maximo 80 caracteres"),
+  descripcion: z.string().optional(),
   cantidad: z.coerce.number().min(0.01, "Cantidad debe ser mayor a 0"),
+  unidad_medida: z.string().optional(),
   precio_unitario: z.coerce.number().min(0, "Precio debe ser mayor o igual a 0"),
-  descuento_porcentaje: z.coerce.number().min(0).max(100).optional(),
+  descuento_pct: z.coerce.number().min(0).max(100).optional(),
+  es_exento: z.boolean().default(false),
 });
 
 const facturaSchema = z.object({
   empresa_id: z.string().min(1, "Seleccione una empresa"),
-  receptor_rut: z.string().min(9, "RUT invalido"),
+  receptor_rut: z.string().min(8, "RUT invalido").refine(validarRUT, "RUT invalido"),
   receptor_razon_social: z.string().min(3, "Razon social requerida"),
-  receptor_giro: z.string().optional(),
-  receptor_direccion: z.string().optional(),
-  receptor_comuna: z.string().optional(),
+  receptor_giro: z.string().min(3, "Giro requerido"),
+  receptor_direccion: z.string().min(5, "Direccion requerida"),
+  receptor_comuna: z.string().min(2, "Comuna requerida"),
+  receptor_ciudad: z.string().optional(),
+  receptor_correo: z.string().email("Email invalido").optional().or(z.literal("")),
   fecha_emision: z.string().optional(),
   observacion: z.string().optional(),
   detalles: z.array(detalleSchema).min(1, "Agregue al menos un item"),
@@ -72,12 +80,13 @@ export function FacturaForm({ empresaId }: FacturaFormProps) {
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<FacturaFormData>({
     resolver: zodResolver(facturaSchema),
     defaultValues: {
       empresa_id: empresaId || "",
-      detalles: [{ nombre: "", cantidad: 1, precio_unitario: 0 }],
+      detalles: [{ nombre: "", cantidad: 1, precio_unitario: 0, es_exento: false }],
     },
   });
 
@@ -91,14 +100,20 @@ export function FacturaForm({ empresaId }: FacturaFormProps) {
   // Calcular totales
   const calcularTotales = () => {
     let neto = 0;
+    let exento = 0;
     detalles?.forEach((d) => {
       const subtotal = (d.cantidad || 0) * (d.precio_unitario || 0);
-      const descuento = subtotal * ((d.descuento_porcentaje || 0) / 100);
-      neto += subtotal - descuento;
+      const descuento = subtotal * ((d.descuento_pct || 0) / 100);
+      const montoItem = subtotal - descuento;
+      if (d.es_exento) {
+        exento += montoItem;
+      } else {
+        neto += montoItem;
+      }
     });
     const iva = Math.round(neto * 0.19);
-    const total = neto + iva;
-    return { neto: Math.round(neto), iva, total };
+    const total = Math.round(neto) + iva + Math.round(exento);
+    return { neto: Math.round(neto), exento: Math.round(exento), iva, total };
   };
 
   const totales = calcularTotales();
@@ -113,15 +128,21 @@ export function FacturaForm({ empresaId }: FacturaFormProps) {
         receptor: {
           rut: data.receptor_rut,
           razon_social: data.receptor_razon_social,
-          giro: data.receptor_giro || undefined,
-          direccion: data.receptor_direccion || undefined,
-          comuna: data.receptor_comuna || undefined,
+          giro: data.receptor_giro,
+          direccion: data.receptor_direccion,
+          comuna: data.receptor_comuna,
+          ciudad: data.receptor_ciudad || undefined,
+          correo: data.receptor_correo || undefined,
         },
         detalles: data.detalles.map((d) => ({
+          codigo: d.codigo || undefined,
           nombre: d.nombre,
+          descripcion: d.descripcion || undefined,
           cantidad: d.cantidad,
+          unidad_medida: d.unidad_medida || undefined,
           precio_unitario: d.precio_unitario,
-          descuento_porcentaje: d.descuento_porcentaje || undefined,
+          descuento_pct: d.descuento_pct || undefined,
+          es_exento: d.es_exento,
         })),
         fecha_emision: data.fecha_emision || undefined,
         observacion: data.observacion || undefined,
@@ -212,27 +233,56 @@ export function FacturaForm({ empresaId }: FacturaFormProps) {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="receptor_giro">Giro</Label>
+            <Label htmlFor="receptor_giro">Giro *</Label>
             <Input
               id="receptor_giro"
               placeholder="Comercio"
               {...register("receptor_giro")}
             />
+            {errors.receptor_giro && (
+              <p className="text-sm text-red-500">{errors.receptor_giro.message}</p>
+            )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="receptor_comuna">Comuna</Label>
+            <Label htmlFor="receptor_correo">Correo</Label>
+            <Input
+              id="receptor_correo"
+              type="email"
+              placeholder="cliente@ejemplo.cl"
+              {...register("receptor_correo")}
+            />
+            {errors.receptor_correo && (
+              <p className="text-sm text-red-500">{errors.receptor_correo.message}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="receptor_direccion">Direccion *</Label>
+            <Input
+              id="receptor_direccion"
+              placeholder="Av. Principal 123"
+              {...register("receptor_direccion")}
+            />
+            {errors.receptor_direccion && (
+              <p className="text-sm text-red-500">{errors.receptor_direccion.message}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="receptor_comuna">Comuna *</Label>
             <Input
               id="receptor_comuna"
               placeholder="Santiago"
               {...register("receptor_comuna")}
             />
+            {errors.receptor_comuna && (
+              <p className="text-sm text-red-500">{errors.receptor_comuna.message}</p>
+            )}
           </div>
-          <div className="md:col-span-2 space-y-2">
-            <Label htmlFor="receptor_direccion">Direccion</Label>
+          <div className="space-y-2">
+            <Label htmlFor="receptor_ciudad">Ciudad</Label>
             <Input
-              id="receptor_direccion"
-              placeholder="Direccion del cliente"
-              {...register("receptor_direccion")}
+              id="receptor_ciudad"
+              placeholder="Santiago"
+              {...register("receptor_ciudad")}
             />
           </div>
         </div>
@@ -246,7 +296,7 @@ export function FacturaForm({ empresaId }: FacturaFormProps) {
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => append({ nombre: "", cantidad: 1, precio_unitario: 0 })}
+            onClick={() => append({ nombre: "", cantidad: 1, precio_unitario: 0, es_exento: false })}
           >
             <Plus className="mr-1 h-4 w-4" /> Agregar Item
           </Button>
@@ -258,49 +308,84 @@ export function FacturaForm({ empresaId }: FacturaFormProps) {
 
         <div className="space-y-3">
           {fields.map((field, index) => (
-            <div key={field.id} className="grid gap-3 md:grid-cols-12 items-end p-3 bg-muted/30 rounded-lg">
-              <div className="md:col-span-5 space-y-1">
-                <Label className="text-xs">Descripcion</Label>
-                <Input
-                  placeholder="Nombre del producto/servicio"
-                  {...register(`detalles.${index}.nombre`)}
-                />
+            <div key={field.id} className="p-4 bg-muted/30 rounded-lg space-y-3">
+              <div className="grid gap-3 md:grid-cols-12 items-end">
+                <div className="md:col-span-2 space-y-1">
+                  <Label className="text-xs">Codigo</Label>
+                  <Input
+                    placeholder="SKU"
+                    {...register(`detalles.${index}.codigo`)}
+                  />
+                </div>
+                <div className="md:col-span-4 space-y-1">
+                  <Label className="text-xs">Nombre *</Label>
+                  <Input
+                    placeholder="Nombre del producto/servicio"
+                    {...register(`detalles.${index}.nombre`)}
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-1">
+                  <Label className="text-xs">Cantidad</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    {...register(`detalles.${index}.cantidad`)}
+                  />
+                </div>
+                <div className="md:col-span-2 space-y-1">
+                  <Label className="text-xs">Precio Unit.</Label>
+                  <Input
+                    type="number"
+                    {...register(`detalles.${index}.precio_unitario`)}
+                  />
+                </div>
+                <div className="md:col-span-1 space-y-1">
+                  <Label className="text-xs">Desc. %</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    {...register(`detalles.${index}.descuento_pct`)}
+                  />
+                </div>
+                <div className="md:col-span-1 flex items-end justify-center pb-2">
+                  {fields.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => remove(index)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  )}
+                </div>
               </div>
-              <div className="md:col-span-2 space-y-1">
-                <Label className="text-xs">Cantidad</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  {...register(`detalles.${index}.cantidad`)}
-                />
-              </div>
-              <div className="md:col-span-2 space-y-1">
-                <Label className="text-xs">Precio Unit.</Label>
-                <Input
-                  type="number"
-                  {...register(`detalles.${index}.precio_unitario`)}
-                />
-              </div>
-              <div className="md:col-span-2 space-y-1">
-                <Label className="text-xs">Desc. %</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  {...register(`detalles.${index}.descuento_porcentaje`)}
-                />
-              </div>
-              <div className="md:col-span-1">
-                {fields.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => remove(index)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                )}
+              <div className="grid gap-3 md:grid-cols-12 items-end">
+                <div className="md:col-span-2 space-y-1">
+                  <Label className="text-xs">Unidad</Label>
+                  <Input
+                    placeholder="UN"
+                    {...register(`detalles.${index}.unidad_medida`)}
+                  />
+                </div>
+                <div className="md:col-span-8 space-y-1">
+                  <Label className="text-xs">Descripcion adicional</Label>
+                  <Input
+                    placeholder="Descripcion detallada (opcional)"
+                    {...register(`detalles.${index}.descripcion`)}
+                  />
+                </div>
+                <div className="md:col-span-2 flex items-center gap-2 pb-2">
+                  <Checkbox
+                    id={`detalles.${index}.es_exento`}
+                    checked={watch(`detalles.${index}.es_exento`)}
+                    onCheckedChange={(checked) => setValue(`detalles.${index}.es_exento`, checked === true)}
+                  />
+                  <Label htmlFor={`detalles.${index}.es_exento`} className="text-xs cursor-pointer">
+                    Exento IVA
+                  </Label>
+                </div>
               </div>
             </div>
           ))}
@@ -314,6 +399,12 @@ export function FacturaForm({ empresaId }: FacturaFormProps) {
                 <span className="text-muted-foreground">Neto:</span>
                 <span>{formatMoney(totales.neto)}</span>
               </div>
+              {totales.exento > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Exento:</span>
+                  <span>{formatMoney(totales.exento)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">IVA (19%):</span>
                 <span>{formatMoney(totales.iva)}</span>

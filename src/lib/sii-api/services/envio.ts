@@ -2,7 +2,7 @@
  * Servicio de Envios al SII
  */
 import { api, ApiResponse } from "../client";
-import type { EnvioSII, ConsultaEstadoResponse } from "../types";
+import type { EnvioSIIResponse, EstadoEnvioResponse } from "../types";
 
 const BASE_PATH = "/api/v1/envio";
 
@@ -15,16 +15,16 @@ export const envioService = {
   /**
    * Listar envios
    */
-  async listar(empresaId?: string): Promise<ApiResponse<EnvioSII[]>> {
+  async listar(empresaId?: string): Promise<ApiResponse<EnvioSIIResponse[]>> {
     const query = empresaId ? `?empresa_id=${empresaId}` : "";
-    return api.get<EnvioSII[]>(`${BASE_PATH}${query}`);
+    return api.get<EnvioSIIResponse[]>(`${BASE_PATH}${query}`);
   },
 
   /**
    * Enviar DTEs al SII
    */
-  async enviar(data: EnviarDTEsRequest): Promise<ApiResponse<EnvioSII>> {
-    return api.post<EnvioSII>(BASE_PATH, data);
+  async enviar(data: EnviarDTEsRequest): Promise<ApiResponse<EnvioSIIResponse>> {
+    return api.post<EnvioSIIResponse>(BASE_PATH, data);
   },
 
   /**
@@ -32,14 +32,14 @@ export const envioService = {
    */
   async consultarEstado(
     trackId: string
-  ): Promise<ApiResponse<ConsultaEstadoResponse>> {
-    return api.get<ConsultaEstadoResponse>(`${BASE_PATH}/${trackId}`);
+  ): Promise<ApiResponse<EstadoEnvioResponse>> {
+    return api.get<EstadoEnvioResponse>(`${BASE_PATH}/${trackId}`);
   },
 
   /**
    * Actualizar estado de un envio (re-consultar al SII)
    */
-  async actualizarEstado(id: string): Promise<ApiResponse<EnvioSII>> {
-    return api.post<EnvioSII>(`${BASE_PATH}/${id}/actualizar`, {});
+  async actualizarEstado(id: string): Promise<ApiResponse<EnvioSIIResponse>> {
+    return api.post<EnvioSIIResponse>(`${BASE_PATH}/${id}/actualizar`, {});
   },
 };

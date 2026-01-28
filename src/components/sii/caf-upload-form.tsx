@@ -128,8 +128,8 @@ export function CAFUploadForm({ empresaId: initialEmpresaId, onSuccess }: CAFUpl
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedFile || !xmlContent) {
-      setError("Selecciona un archivo CAF");
+    if (!selectedFile || !cafPreview) {
+      setError("Selecciona un archivo CAF valido");
       return;
     }
 
@@ -143,10 +143,12 @@ export function CAFUploadForm({ empresaId: initialEmpresaId, onSuccess }: CAFUpl
     setSuccess(false);
 
     try {
-      const result = await cafService.cargar({
-        empresa_id: selectedEmpresaId,
-        archivo_xml: xmlContent,
-      });
+      // Enviar como multipart/form-data con tipo_dte y archivo
+      const result = await cafService.cargarMultipart(
+        selectedEmpresaId,
+        cafPreview.tipo_dte as 33 | 34 | 39 | 41 | 52 | 56 | 61,
+        selectedFile
+      );
 
       if (!result.success) {
         setError(result.error?.message || "Error al cargar el CAF");

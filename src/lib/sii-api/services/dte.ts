@@ -7,6 +7,7 @@ import type {
   GenerarFacturaRequest,
   GenerarBoletaRequest,
   GenerarNotaCreditoRequest,
+  GenerarGuiaDespachoRequest,
   TipoDTE,
 } from "../types";
 
@@ -93,7 +94,7 @@ export const dteService = {
    * Generar Guia de Despacho (tipo 52)
    */
   async generarGuiaDespacho(
-    data: GenerarFacturaRequest & { ind_traslado: number }
+    data: GenerarGuiaDespachoRequest
   ): Promise<ApiResponse<DTE>> {
     return api.post<DTE>(`${BASE_PATH}/guia-despacho`, data);
   },

@@ -115,6 +115,51 @@ export async function apiRequest<T>(
 }
 
 /**
+ * Realiza una peticion multipart/form-data a la API SII
+ * Usado para subir archivos (CAF, certificados)
+ */
+export async function apiRequestMultipart<T>(
+  endpoint: string,
+  formData: FormData
+): Promise<ApiResponse<T>> {
+  // El endpoint viene como /api/v1/empresas, remover /api/v1
+  const path = endpoint.replace(/^\/api\/v1\//, "");
+  const url = `${getApiUrl()}/${path}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+      // NO incluir Content-Type - el browser lo agrega con boundary automaticamente
+      credentials: "include", // Importante para enviar cookies al proxy
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.error || {
+          code: "HTTP_ERROR",
+          message: `Error ${response.status}: ${response.statusText}`,
+        },
+      };
+    }
+
+    return data as ApiResponse<T>;
+  } catch (error) {
+    console.error("API Multipart Request Error:", error);
+    return {
+      success: false,
+      error: {
+        code: "NETWORK_ERROR",
+        message: error instanceof Error ? error.message : "Error de conexion",
+      },
+    };
+  }
+}
+
+/**
  * Helpers para metodos HTTP comunes
  */
 export const api = {
@@ -132,4 +177,7 @@ export const api = {
 
   delete: <T>(endpoint: string, token?: string) =>
     apiRequest<T>(endpoint, { method: "DELETE", token }),
+
+  postMultipart: <T>(endpoint: string, formData: FormData) =>
+    apiRequestMultipart<T>(endpoint, formData),
 };

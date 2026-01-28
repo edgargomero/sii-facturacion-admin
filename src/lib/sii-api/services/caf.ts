@@ -2,7 +2,7 @@
  * Servicio de CAFs (Codigo de Autorizacion de Folios)
  */
 import { api, ApiResponse } from "../client";
-import type { CAF, CargarCAFRequest, SolicitarCAFRequest, TipoDTE } from "../types";
+import type { CAF, SolicitarCAFRequest, TipoDTE } from "../types";
 
 const BASE_PATH = "/api/v1/caf";
 
@@ -41,10 +41,21 @@ export const cafService = {
   },
 
   /**
-   * Cargar un nuevo CAF (archivo XML)
+   * Cargar un nuevo CAF (archivo XML) usando multipart/form-data
+   * @param empresaId ID de la empresa
+   * @param tipoDte Tipo de DTE (33, 34, 39, etc.)
+   * @param file Archivo XML del CAF
    */
-  async cargar(data: CargarCAFRequest): Promise<ApiResponse<CAF>> {
-    return api.post<CAF>(BASE_PATH, data);
+  async cargarMultipart(
+    empresaId: string,
+    tipoDte: TipoDTE,
+    file: File
+  ): Promise<ApiResponse<CAF>> {
+    const formData = new FormData();
+    formData.append("empresa_id", empresaId);
+    formData.append("tipo_dte", tipoDte.toString());
+    formData.append("file", file);
+    return api.postMultipart<CAF>(BASE_PATH, formData);
   },
 
   /**

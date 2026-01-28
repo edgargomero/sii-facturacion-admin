@@ -60,15 +60,12 @@ export function CertificadoForm({
     setSuccess(false);
 
     try {
-      // Convertir archivo a base64
-      const base64 = await fileToBase64(selectedFile);
-
-      const result = await certificadosService.cargar({
-        empresa_id: empresaId,
-        archivo_pfx: base64,
-        password: password,
-        nombre: selectedFile.name,
-      });
+      // Enviar como multipart/form-data
+      const result = await certificadosService.cargarMultipart(
+        empresaId,
+        password,
+        selectedFile
+      );
 
       if (!result.success) {
         setError(result.error?.message || "Error al cargar el certificado");
@@ -90,20 +87,6 @@ export function CertificadoForm({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const result = reader.result as string;
-        // Remover el prefijo "data:application/x-pkcs12;base64," o similar
-        const base64 = result.split(",")[1];
-        resolve(base64);
-      };
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const diasRestantes = certificadoActual

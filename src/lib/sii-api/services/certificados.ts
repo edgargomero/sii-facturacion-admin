@@ -2,16 +2,27 @@
  * Servicio de Certificados Digitales
  */
 import { api, ApiResponse } from "../client";
-import type { Certificado, CargarCertificadoRequest } from "../types";
+import type { Certificado } from "../types";
 
 const BASE_PATH = "/api/v1/certificados";
 
 export const certificadosService = {
   /**
-   * Cargar un certificado digital (.pfx) para una empresa
+   * Cargar un certificado digital (.pfx) usando multipart/form-data
+   * @param empresaId ID de la empresa
+   * @param password Contrasena del certificado
+   * @param file Archivo .pfx o .p12
    */
-  async cargar(data: CargarCertificadoRequest): Promise<ApiResponse<Certificado>> {
-    return api.post<Certificado>(BASE_PATH, data);
+  async cargarMultipart(
+    empresaId: string,
+    password: string,
+    file: File
+  ): Promise<ApiResponse<Certificado>> {
+    const formData = new FormData();
+    formData.append("empresa_id", empresaId);
+    formData.append("password", password);
+    formData.append("file", file);
+    return api.postMultipart<Certificado>(BASE_PATH, formData);
   },
 
   /**
