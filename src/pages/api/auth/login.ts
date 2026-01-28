@@ -85,6 +85,11 @@ export const POST: APIRoute = async ({ request }) => {
     const cookies = createSessionCookies(access_token, refresh_token, isLocalhost);
 
     // Retornar respuesta con cookies
+    // Cada cookie necesita su propio header Set-Cookie
+    const headers = new Headers();
+    headers.set("Content-Type", "application/json");
+    cookies.forEach((cookie) => headers.append("Set-Cookie", cookie));
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -95,10 +100,7 @@ export const POST: APIRoute = async ({ request }) => {
       }),
       {
         status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Set-Cookie": cookies.join(", "),
-        },
+        headers,
       }
     );
   } catch (error) {
