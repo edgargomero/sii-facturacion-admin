@@ -15,12 +15,12 @@ const empresaSchema = z.object({
   direccion: z.string().min(5, "Direccion requerida"),
   comuna: z.string().min(2, "Comuna requerida"),
   ciudad: z.string().min(2, "Ciudad requerida"),
-  acteco: z.string().optional(),
+  acteco: z.string().min(1, "Codigo ACTECO requerido"),
   telefono: z.string().optional(),
   email: z.string().email("Email invalido").optional().or(z.literal("")),
-  resolucion_numero: z.coerce.number().min(0, "Numero de resolucion requerido"),
-  resolucion_fecha: z.string().min(1, "Fecha de resolucion requerida"),
-  ambiente: z.enum(["CERTIFICACION", "PRODUCCION"]),
+  nro_resol: z.coerce.number().min(0, "Numero de resolucion requerido"),
+  fch_resol: z.string().min(1, "Fecha de resolucion requerida"),
+  sii_ambiente: z.enum(["CERTIFICACION", "PRODUCCION"]),
 });
 
 type EmpresaFormData = z.infer<typeof empresaSchema>;
@@ -42,7 +42,7 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
   } = useForm<EmpresaFormData>({
     resolver: zodResolver(empresaSchema),
     defaultValues: {
-      ambiente: "CERTIFICACION",
+      sii_ambiente: "CERTIFICACION",
       ...initialData,
     },
   });
@@ -52,6 +52,13 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
     setError(null);
 
     try {
+      // Convertir acteco de string a array de numeros
+      // Soporta formato "620100" o "620100,620200"
+      const actecoArray = data.acteco
+        .split(",")
+        .map((code) => parseInt(code.trim(), 10))
+        .filter((code) => !isNaN(code));
+
       const requestData = {
         rut: data.rut,
         razon_social: data.razon_social,
@@ -59,12 +66,12 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
         direccion: data.direccion,
         comuna: data.comuna,
         ciudad: data.ciudad,
-        acteco: data.acteco || undefined,
+        acteco: actecoArray,
         telefono: data.telefono || undefined,
         email: data.email || undefined,
-        resolucion_numero: data.resolucion_numero,
-        resolucion_fecha: data.resolucion_fecha,
-        ambiente: data.ambiente,
+        nro_resol: data.nro_resol,
+        fch_resol: data.fch_resol,
+        sii_ambiente: data.sii_ambiente,
       };
 
       const result = empresaId
@@ -174,12 +181,18 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="acteco">Codigo Actividad (ACTECO)</Label>
+          <Label htmlFor="acteco">Codigo Actividad (ACTECO) *</Label>
           <Input
             id="acteco"
             placeholder="620100"
             {...register("acteco")}
           />
+          <p className="text-xs text-muted-foreground">
+            Multiples codigos separados por coma: 620100,620200
+          </p>
+          {errors.acteco && (
+            <p className="text-sm text-red-500">{errors.acteco.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -209,31 +222,31 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
         <h3 className="font-medium mb-4">Resolucion SII</h3>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="resolucion_numero">Numero Resolucion *</Label>
+            <Label htmlFor="nro_resol">Numero Resolucion *</Label>
             <Input
-              id="resolucion_numero"
+              id="nro_resol"
               type="number"
               min="0"
               placeholder="0"
-              {...register("resolucion_numero")}
+              {...register("nro_resol")}
             />
             <p className="text-xs text-muted-foreground">
               Para CERTIFICACION usar 0. Para PRODUCCION usar el numero real.
             </p>
-            {errors.resolucion_numero && (
-              <p className="text-sm text-red-500">{errors.resolucion_numero.message}</p>
+            {errors.nro_resol && (
+              <p className="text-sm text-red-500">{errors.nro_resol.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="resolucion_fecha">Fecha Resolucion *</Label>
+            <Label htmlFor="fch_resol">Fecha Resolucion *</Label>
             <Input
-              id="resolucion_fecha"
+              id="fch_resol"
               type="date"
-              {...register("resolucion_fecha")}
+              {...register("fch_resol")}
             />
-            {errors.resolucion_fecha && (
-              <p className="text-sm text-red-500">{errors.resolucion_fecha.message}</p>
+            {errors.fch_resol && (
+              <p className="text-sm text-red-500">{errors.fch_resol.message}</p>
             )}
           </div>
         </div>
@@ -246,7 +259,7 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
             <input
               type="radio"
               value="CERTIFICACION"
-              {...register("ambiente")}
+              {...register("sii_ambiente")}
               className="w-4 h-4"
             />
             <span>Certificacion (Pruebas)</span>
@@ -255,7 +268,7 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
             <input
               type="radio"
               value="PRODUCCION"
-              {...register("ambiente")}
+              {...register("sii_ambiente")}
               className="w-4 h-4"
             />
             <span>Produccion</span>

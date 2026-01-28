@@ -227,7 +227,7 @@ export function CAFUploadForm({ empresaId: initialEmpresaId, onSuccess }: CAFUpl
               )}
               {selectedEmpresa && (
                 <p className="text-xs text-muted-foreground">
-                  Ambiente: {selectedEmpresa.ambiente}
+                  Ambiente: {selectedEmpresa.sii_ambiente}
                 </p>
               )}
             </div>

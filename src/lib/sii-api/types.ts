@@ -13,15 +13,15 @@ export interface Empresa {
   direccion: string;
   comuna: string;
   ciudad: string;
-  acteco?: string;
+  acteco: number[];
   telefono?: string;
   email?: string;
-  resolucion_numero: number;
-  resolucion_fecha: string;
-  ambiente: "CERTIFICACION" | "PRODUCCION";
-  activa: boolean;
+  nro_resol: number;
+  fch_resol: string;
+  sii_ambiente: "CERTIFICACION" | "PRODUCCION";
+  tiene_cert?: boolean;
+  cafs_activos?: number;
   created_at: string;
-  updated_at: string;
 }
 
 export interface CreateEmpresaRequest {
@@ -31,12 +31,12 @@ export interface CreateEmpresaRequest {
   direccion: string;
   comuna: string;
   ciudad: string;
-  acteco?: string;
+  acteco: number[];
   telefono?: string;
   email?: string;
-  resolucion_numero: number;
-  resolucion_fecha: string;
-  ambiente?: "CERTIFICACION" | "PRODUCCION";
+  nro_resol: number;
+  fch_resol: string;
+  sii_ambiente: "CERTIFICACION" | "PRODUCCION";
 }
 
 // ===========================================

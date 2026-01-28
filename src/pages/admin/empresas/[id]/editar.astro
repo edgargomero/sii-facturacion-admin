@@ -22,12 +22,12 @@ const empresa = {
   direccion: empresaData.direccion,
   comuna: empresaData.comuna,
   ciudad: empresaData.ciudad,
-  acteco: empresaData.acteco || '',
+  acteco: empresaData.acteco?.join(', ') || '',
   telefono: empresaData.telefono || '',
   email: empresaData.email || '',
-  resolucion_numero: empresaData.resolucion_numero,
-  resolucion_fecha: empresaData.resolucion_fecha,
-  ambiente: empresaData.ambiente as 'CERTIFICACION' | 'PRODUCCION',
+  nro_resol: empresaData.nro_resol,
+  fch_resol: empresaData.fch_resol,
+  sii_ambiente: empresaData.sii_ambiente as 'CERTIFICACION' | 'PRODUCCION',
 };
 ---
 

@@ -55,11 +55,11 @@ const stats = {
               <p class="text-muted-foreground font-mono">{empresa.rut}</p>
             </div>
             <span class={`ml-auto px-3 py-1 rounded-full text-sm font-medium ${
-              empresa.ambiente === 'PRODUCCION'
+              empresa.sii_ambiente === 'PRODUCCION'
                 ? 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'
                 : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400'
             }`}>
-              {empresa.ambiente}
+              {empresa.sii_ambiente}
             </span>
           </div>
 
@@ -70,7 +70,7 @@ const stats = {
             </div>
             <div>
               <dt class="text-muted-foreground">Codigo Actividad</dt>
-              <dd class="font-medium font-mono">{empresa.acteco || '-'}</dd>
+              <dd class="font-medium font-mono">{empresa.acteco?.join(', ') || '-'}</dd>
             </div>
             <div>
               <dt class="text-muted-foreground">Direccion</dt>
@@ -90,7 +90,7 @@ const stats = {
             </div>
             <div>
               <dt class="text-muted-foreground">Resolucion SII</dt>
-              <dd class="font-medium">N° {empresa.resolucion_numero} del {new Date(empresa.resolucion_fecha).toLocaleDateString('es-CL')}</dd>
+              <dd class="font-medium">N° {empresa.nro_resol} del {new Date(empresa.fch_resol).toLocaleDateString('es-CL')}</dd>
             </div>
             <div>
               <dt class="text-muted-foreground">Registrada</dt>

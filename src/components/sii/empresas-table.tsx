@@ -1,4 +1,4 @@
-import { Building2, CheckCircle, XCircle, MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Eye } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -14,8 +14,7 @@ interface Empresa {
   razon_social: string;
   giro: string;
   comuna: string;
-  ambiente: string;
-  activa: boolean;
+  sii_ambiente: string;
 }
 
 interface EmpresasTableProps {
@@ -32,7 +31,6 @@ export function EmpresasTable({ empresas }: EmpresasTableProps) {
           <TableHead>Giro</TableHead>
           <TableHead>Comuna</TableHead>
           <TableHead>Ambiente</TableHead>
-          <TableHead>Estado</TableHead>
           <TableHead>Acciones</TableHead>
         </TableRow>
       </TableHeader>
@@ -48,26 +46,13 @@ export function EmpresasTable({ empresas }: EmpresasTableProps) {
             <TableCell>
               <span
                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                  empresa.ambiente === "PRODUCCION"
+                  empresa.sii_ambiente === "PRODUCCION"
                     ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
                     : "bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400"
                 }`}
               >
-                {empresa.ambiente}
+                {empresa.sii_ambiente}
               </span>
-            </TableCell>
-            <TableCell>
-              {empresa.activa ? (
-                <span className="flex items-center gap-1 text-green-600">
-                  <CheckCircle className="h-4 w-4" />
-                  Activa
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-red-600">
-                  <XCircle className="h-4 w-4" />
-                  Inactiva
-                </span>
-              )}
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
@@ -91,7 +76,7 @@ export function EmpresasTable({ empresas }: EmpresasTableProps) {
         ))}
         {empresas.length === 0 && (
           <TableRow>
-            <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+            <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
               No hay empresas registradas
             </TableCell>
           </TableRow>
