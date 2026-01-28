@@ -2,20 +2,12 @@
  * Cliente HTTP para la API de Facturacion SII
  *
  * Este cliente maneja todas las comunicaciones con el backend Go
+ * a traves de un proxy que agrega autenticacion desde cookies httpOnly
  */
 
-// URL base de la API
-const API_URL_PROD = "https://sii-facturacion-api.edgar-gomero.workers.dev";
-const API_URL_DEV = "http://localhost:8080";
-
-const getApiUrl = () => {
-  // En desarrollo local usar localhost
-  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-    return API_URL_DEV;
-  }
-  // En producción usar la URL del backend
-  return API_URL_PROD;
-};
+// Usar proxy del frontend para todas las llamadas
+// El proxy lee el token de la cookie httpOnly y lo agrega al request
+const getApiUrl = () => "/api/proxy";
 
 // Tipos de respuesta de la API
 export interface ApiResponse<T> {
@@ -69,31 +61,32 @@ export const clearAuthToken = () => {
 };
 
 /**
- * Realiza una peticion a la API SII
+ * Realiza una peticion a la API SII a traves del proxy
+ * El proxy agrega automaticamente el token de autenticacion desde cookies httpOnly
  */
 export async function apiRequest<T>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<ApiResponse<T>> {
-  const { method = "GET", body, headers = {}, token } = options;
+  const { method = "GET", body, headers = {} } = options;
 
-  const authToken = token || getAuthToken();
-  const url = `${getApiUrl()}${endpoint}`;
+  // El endpoint viene como /api/v1/empresas, remover /api/v1
+  const path = endpoint.replace(/^\/api\/v1\//, "");
+  const url = `${getApiUrl()}/${path}`;
 
   const requestHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...headers,
   };
 
-  if (authToken) {
-    requestHeaders["Authorization"] = `Bearer ${authToken}`;
-  }
+  // NO necesitamos agregar Authorization - el proxy lo hace
 
   try {
     const response = await fetch(url, {
       method,
       headers: requestHeaders,
       body: body ? JSON.stringify(body) : undefined,
+      credentials: "include", // Importante para enviar cookies al proxy
     });
 
     const data = await response.json();
