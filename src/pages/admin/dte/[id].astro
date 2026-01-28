@@ -12,41 +12,22 @@ import {
   Printer,
   Copy
 } from 'lucide-react';
+import { dteService, TIPOS_DTE } from '@/lib/sii-api';
 
 const { id } = Astro.params;
 
-const TIPOS_DTE: Record<number, string> = {
-  33: 'Factura Electronica',
-  34: 'Factura Exenta',
-  39: 'Boleta Electronica',
-  41: 'Boleta Exenta',
-  52: 'Guia de Despacho',
-  56: 'Nota de Debito',
-  61: 'Nota de Credito',
-};
+if (!id) {
+  return Astro.redirect('/admin/dte');
+}
 
-// TODO: Obtener de la API real
-const dte = {
-  id: id,
-  tipo_dte: 33,
-  folio: 123,
-  fecha_emision: '2024-01-15',
-  receptor_rut: '12.345.678-9',
-  receptor_razon_social: 'Cliente Ejemplo SpA',
-  receptor_giro: 'Comercio',
-  receptor_direccion: 'Av. Ejemplo 456',
-  receptor_comuna: 'Providencia',
-  monto_neto: 100000,
-  monto_iva: 19000,
-  monto_exento: 0,
-  monto_total: 119000,
-  estado: 'ACEPTADO',
-  track_id: '123456789',
-  created_at: '2024-01-15T10:30:00',
-  detalles: [
-    { nombre: 'Servicio de desarrollo', cantidad: 10, precio_unitario: 10000, total: 100000 },
-  ],
-};
+// Obtener DTE de la API
+const response = await dteService.obtener(id);
+
+if (!response.success || !response.data) {
+  return Astro.redirect('/admin/dte');
+}
+
+const dte = response.data;
 
 const formatMoney = (value: number) => {
   return new Intl.NumberFormat('es-CL', {
@@ -138,44 +119,7 @@ const StatusIcon = status.icon;
               <dt class="text-muted-foreground">Razon Social</dt>
               <dd class="font-medium">{dte.receptor_razon_social}</dd>
             </div>
-            <div>
-              <dt class="text-muted-foreground">Giro</dt>
-              <dd class="font-medium">{dte.receptor_giro || '-'}</dd>
-            </div>
-            <div>
-              <dt class="text-muted-foreground">Comuna</dt>
-              <dd class="font-medium">{dte.receptor_comuna || '-'}</dd>
-            </div>
-            <div class="md:col-span-2">
-              <dt class="text-muted-foreground">Direccion</dt>
-              <dd class="font-medium">{dte.receptor_direccion || '-'}</dd>
-            </div>
           </dl>
-        </div>
-
-        <!-- Detalle -->
-        <div class="rounded-xl border p-6">
-          <h4 class="font-semibold mb-4">Detalle</h4>
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b">
-                <th class="text-left py-2 font-medium">Descripcion</th>
-                <th class="text-right py-2 font-medium">Cant.</th>
-                <th class="text-right py-2 font-medium">P. Unit.</th>
-                <th class="text-right py-2 font-medium">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dte.detalles.map((det) => (
-                <tr class="border-b">
-                  <td class="py-3">{det.nombre}</td>
-                  <td class="py-3 text-right">{det.cantidad}</td>
-                  <td class="py-3 text-right">{formatMoney(det.precio_unitario)}</td>
-                  <td class="py-3 text-right font-medium">{formatMoney(det.total)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </div>
 

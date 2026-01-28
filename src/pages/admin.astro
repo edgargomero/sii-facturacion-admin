@@ -12,17 +12,43 @@ import {
 import Layout from '@/layouts/Layout.astro';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OnboardingGuide } from '@/components/sii/onboarding-guide';
+import { empresasService, dteService, cafService, envioService } from '@/lib/sii-api';
 
-// TODO: Obtener datos reales de la API
-// Por ahora usamos datos de ejemplo
+// Obtener datos reales de la API
+const [empresasRes, dtesRes, cafsRes, enviosRes] = await Promise.all([
+  empresasService.listar(),
+  dteService.listar(),
+  cafService.listar(),
+  envioService.listar(),
+]);
+
+const empresas = empresasRes.success && empresasRes.data ? empresasRes.data : [];
+const dtes = dtesRes.success && dtesRes.data ? dtesRes.data : [];
+const cafs = cafsRes.success && cafsRes.data ? cafsRes.data : [];
+const envios = enviosRes.success && enviosRes.data ? enviosRes.data : [];
+
+// Calcular estadisticas del mes actual
+const now = new Date();
+const inicioMes = new Date(now.getFullYear(), now.getMonth(), 1);
+const dtesMes = dtes.filter(d => new Date(d.created_at) >= inicioMes);
+const facturadoMes = dtesMes.reduce((sum, d) => sum + d.monto_total, 0);
+
+// CAFs por vencer (estado ACTIVO con pocos folios disponibles)
+const cafsPorVencer = cafs.filter(c => c.estado === 'ACTIVO' && c.folios_disponibles < 50).length;
+
+// Estadisticas de envios
+const enviosPendientes = envios.filter(e => e.estado === 'ENVIADO').length;
+const enviosAceptados = envios.filter(e => e.estado === 'ACEPTADO').length;
+const enviosRechazados = envios.filter(e => e.estado === 'RECHAZADO').length;
+
 const stats = {
-  empresas: 3,
-  dtes_mes: 156,
-  facturado_mes: 12500000,
-  cafs_por_vencer: 2,
-  envios_pendientes: 5,
-  envios_aceptados: 148,
-  envios_rechazados: 3,
+  empresas: empresas.length,
+  dtes_mes: dtesMes.length,
+  facturado_mes: facturadoMes,
+  cafs_por_vencer: cafsPorVencer,
+  envios_pendientes: enviosPendientes,
+  envios_aceptados: enviosAceptados,
+  envios_rechazados: enviosRechazados,
 };
 
 const formatMoney = (value: number) => {
