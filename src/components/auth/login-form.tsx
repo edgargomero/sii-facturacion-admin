@@ -61,6 +61,7 @@ export function LoginForm({ returnUrl, initialError }: LoginFormProps) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(data),
       });
 
