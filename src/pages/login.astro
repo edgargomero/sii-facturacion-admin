@@ -8,18 +8,19 @@ import { LoginForm } from '@/components/auth/login-form';
 import { FileText } from 'lucide-react';
 import { parseSessionCookies } from '@/lib/auth/cookies';
 
+// Obtener parametros de URL
+const returnUrl = Astro.url.searchParams.get('returnUrl') || '/admin';
+const error = Astro.url.searchParams.get('error');
+
 // Verificar si ya esta autenticado
 const cookieHeader = Astro.request.headers.get('Cookie');
 const { accessToken } = parseSessionCookies(cookieHeader);
 
-// Si hay token, redirigir a admin (el middleware validara)
-if (accessToken) {
+// Si hay token Y no hay error de sesion, redirigir a admin
+// Si hay error (session_expired, invalid_session), quedarse en login
+if (accessToken && !error) {
   return Astro.redirect('/admin');
 }
-
-// Obtener parametros de URL
-const returnUrl = Astro.url.searchParams.get('returnUrl') || '/admin';
-const error = Astro.url.searchParams.get('error');
 ---
 
 <script is:inline>
