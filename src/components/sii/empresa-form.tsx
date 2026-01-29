@@ -140,15 +140,27 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
         sii_ambiente: data.sii_ambiente,
       };
 
+      console.log("[EmpresaForm] Enviando datos:", requestData);
+
       const result = empresaId
         ? await empresasService.actualizar(empresaId, requestData)
         : await empresasService.crear(requestData);
 
+      console.log("[EmpresaForm] Respuesta del servidor:", result);
+
       if (!result.success) {
+        console.error("[EmpresaForm] Error:", result.error);
         setError(result.error?.message || "Error al guardar la empresa");
         return;
       }
 
+      if (!result.data) {
+        console.error("[EmpresaForm] Success pero sin data:", result);
+        setError("Error: El servidor respondio sin datos de la empresa creada");
+        return;
+      }
+
+      console.log("[EmpresaForm] Empresa creada/actualizada:", result.data);
       setSuccess(true);
 
       // Esperar un momento para mostrar el exito antes de redirigir
@@ -160,6 +172,7 @@ export function EmpresaForm({ initialData, empresaId, onSuccess }: EmpresaFormPr
         }
       }, 1500);
     } catch (err) {
+      console.error("[EmpresaForm] Excepcion:", err);
       setError("Error de conexion. Intenta nuevamente.");
     } finally {
       setIsLoading(false);
