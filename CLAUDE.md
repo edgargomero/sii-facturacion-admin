@@ -16,12 +16,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-```bash
-npm run dev       # Start development server
-npm run build     # Build for production
-npm run preview   # Preview production build locally
-npm run check     # TypeScript type checking
-npm run deploy    # Build and deploy to Cloudflare Pages
+**IMPORTANTE:** Usar siempre `pnpm` y PowerShell para todos los comandos.
+
+```powershell
+pnpm dev       # Start development server
+pnpm build     # Build for production
+pnpm preview   # Preview production build locally
+pnpm check     # TypeScript type checking
+pnpm deploy    # Build and deploy to Cloudflare Pages
 ```
 
 ## Architecture
@@ -52,6 +54,14 @@ const empresas = response.data || [];
 - `services/` - Domain-specific service modules (empresas, dte, caf, rcof, envio, certificados, auth)
 
 Services use `api.get/post/put/delete` helpers and return `ApiResponse<T>` wrapper.
+
+**Multipart uploads:** For file uploads (CAF, certificados), use `api.postMultipart()`:
+```typescript
+const formData = new FormData();
+formData.append("empresa_id", empresaId);
+formData.append("file", file);
+return api.postMultipart<CAF>(BASE_PATH, formData);
+```
 
 ### Component Organization
 
@@ -134,3 +144,56 @@ This frontend connects to `sii-facturacion-go` backend. The API client auto-dete
 - **CAF:** Authorized folio codes from SII
 - **RCOF:** Folio consumption reports (mandatory for boletas)
 - **Ambientes:** CERTIFICACION (testing), PRODUCCION (live)
+
+## Field Naming Conventions
+
+### Frontend ↔ Backend DTO ↔ Database
+
+Los nombres de campos deben coincidir entre frontend, backend DTOs y base de datos:
+
+| Frontend (JSON) | Backend DTO | Database Column |
+|-----------------|-------------|-----------------|
+| `sii_ambiente` | `SIIAmbiente` | `ambiente` |
+| `fch_resol` | `FchResol` | `fecha_resolucion` |
+| `nro_resol` | `NroResol` | `numero_resolucion` |
+| `descuento_pct` | `DescuentoPct` | `descuento_porcentaje` |
+
+### Campos Requeridos por Formulario
+
+**Factura (tipo 33/34):**
+- Receptor: `rut`, `razon_social`, `giro`, `direccion`, `comuna` (todos requeridos)
+- Detalle: `nombre`, `cantidad`, `precio_unitario`, `es_exento`
+
+**Boleta (tipo 39/41):**
+- Receptor: opcional (`rut`, `razon_social`)
+- `monto_bruto`: boolean - indica si precios incluyen IVA
+- Detalle: `nombre`, `cantidad`, `precio_unitario`, `es_exento`
+
+**Guia Despacho (tipo 52):**
+- Requiere `ind_traslado` (1-9)
+- Opcional: `transporte` (patente, chofer, direccion destino)
+
+## Authentication Flow
+
+1. Login envia credenciales a `/api/v1/auth/login`
+2. Backend retorna JWT tokens
+3. Frontend guarda en cookies: `sii_session` (access), `sii_refresh` (refresh)
+4. Middleware valida token en cada request a `/admin/*`
+5. Si token invalido: redirect a `/login?error=session_expired`
+
+**IMPORTANTE:** La pagina de login NO debe redirigir a `/admin` si hay parametro `error` en la URL (evita redirect loop).
+
+## Deploy
+
+### Frontend (Cloudflare Pages)
+```powershell
+pnpm run deploy
+```
+
+### Backend (Cloudflare Workers Containers)
+```powershell
+cd ../sii-facturacion-go
+pnpm run deploy
+```
+
+El backend usa Docker para compilar Go y despliega como container en Cloudflare Workers.
